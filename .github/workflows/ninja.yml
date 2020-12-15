@@ -1,0 +1,48 @@
+name: ninja
+
+on:
+  push:
+    branches: [ flutter-1.22-candidate.12-tizen ]
+  pull_request:
+    branches: [ flutter-1.22-candidate.12-tizen ]
+  workflow_dispatch:
+
+jobs:
+  arm:
+    runs-on: ubuntu-latest
+    container:
+      image: swiftkim/tizen_tools:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          gclient config \
+            --name="src/flutter" \
+            --deps-file="DEPS" \
+            --unmanaged \
+            https://github.com/flutter-tizen/engine.git
+          gclient sync
+      - uses: actions/checkout@v2
+        with:
+          path: src/flutter
+      - name: Sync dependencies
+        run: gclient sync -D
+      - name: Run ninja build
+        run: |
+          cd src
+          sed -i 's/"-Wno-non-c-typedef-for-linkage",//g' \
+            build/config/compiler/BUILD.gn
+          flutter/tools/gn \
+            --target-os linux \
+            --linux-cpu arm \
+            --target-toolchain /tizen_tools/toolchains \
+            --target-sysroot /tizen_tools/sysroot/arm \
+            --target-triple armv7l-tizen-linux-gnueabi \
+            --runtime-mode release \
+            --embedder-for-target \
+            --build-tizen-shell
+          ninja -C out/linux_release_arm
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: tizen-arm-release
+          path: src/out/linux_release_arm/libflutter_linux_tizen.so
