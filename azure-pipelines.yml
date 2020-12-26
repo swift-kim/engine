@@ -1,19 +1,92 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Azure Pipelines YAML pipeline
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema
+name: ninja
 
+# TODO: differentiate pr build
 trigger:
-- main
+- flutter-1.22-candidate.12-tizen
+pr:
+- flutter-1.22-candidate.12-tizen
 
-pool:
-  vmImage: 'ubuntu-latest'
+# TODO: process and publish artifacts
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/phases?tabs=yaml&view=azure-devops#artifact-download
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+# TODO: read more docs
+# https://docs.microsoft.com/en-us/azure/devops/pipelines
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+jobs:
+- job: build
+  strategy:
+    matrix: 
+      arm-release:
+        buildArch: arm
+        buildMode: release
+        targetTriple: armv7l-tizen-linux-gnueabi
+      arm-debug:
+        buildArch: arm
+        buildMode: debug
+        targetTriple: armv7l-tizen-linux-gnueabi
+      x86-debug:
+        buildArch: x86
+        buildMode: debug
+        targetTriple: i586-tizen-linux-gnueabi
+  pool: Test
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 2
+  variables:
+  - name: buildroot
+    value: $(Pipeline.Workspace)/src
+  steps:
+  - checkout: self
+    clean: false
+    path: src/flutter
+  # - bash: gclient sync -D
+  #   displayName: Sync dependencies
+  #   workingDirectory: $(buildroot)
+  # - bash: |
+  #     flutter/tools/gn \
+  #       --target-os linux \
+  #       --linux-cpu $(buildArch) \
+  #       --target-toolchain tizen_tools/toolchains \
+  #       --target-sysroot tizen_tools/sysroot/$(buildArch) \
+  #       --target-triple $(targetTriple) \
+  #       --runtime-mode $(buildMode) \
+  #       --embedder-for-target \
+  #       --build-tizen-shell
+  #     ninja -C out/linux_$(buildMode)_$(buildArch)
+  #   displayName: Run ninja build
+  #   workingDirectory: $(buildroot)
+
+#   - task: CopyFiles@2
+#     displayName: Copy artifacts
+#     inputs:
+#       sourceFolder: $(buildroot)/out/linux_$(buildMode)_$(buildArch)
+#       contents: |
+#         libflutter_linux_tizen.so
+#         icudtl.dat
+#       targetFolder: $(Build.StagingDirectory)/tizen-$(buildArch)-$(buildMode)
+#       cleanTargetFolder: true
+#   - task: CopyFiles@2
+#     displayName: Copy headers
+#     inputs:
+#       ...
+#   - bash: ...
+#     displayName: Create a release
+#     workingDirectory: $(buildroot)
+#   - task: PublishBuildArtifacts@1
+#     displayName: Publish
+#     inputs:
+#       pathToPublish: $(Build.StagingDirectory)/...
+#       artifactName: engine
+
+# - job: Publish
+#   pool: Test
+#   dependsOn: Build
+#   condition: succeeded()
+#   steps:
+#   - checkout: none
+#   - task: DownloadBuildArtifacts@0
+#     displayName: 'Download Build Artifacts'
+#     inputs:
+#       artifactName: WebSite
+#       downloadPath: $(System.DefaultWorkingDirectory)
