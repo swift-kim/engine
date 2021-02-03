@@ -83,9 +83,6 @@ jobs:
       cp default/out/linux_$(mode)_$(arch)/libflutter_tizen.so $OUTDIR
       cp tizen40/out/linux_$(mode)_$(arch)/libflutter_tizen.so $OUTDIR/libflutter_tizen40.so
       cp tizen40/out/linux_$(mode)_$(arch)/libflutter_engine.so $OUTDIR
-      if [ "$(System.JobName)" = "tizen-arm-release" ]; then
-        cp default/out/linux_$(mode)_$(arch)/icudtl.dat $OUTDIR
-      fi
     displayName: Copy artifacts
     workingDirectory: $(buildroot)/output
     failOnStderr: true
@@ -120,7 +117,6 @@ jobs:
     failOnStderr: true
   - bash: |
       mv $(Pipeline.Workspace)/tizen-* .
-      mv tizen-arm-release/icudtl.dat common
       for platform in linux windows darwin; do
         for mode in release profile; do
           curl -o tmp.zip https://storage.googleapis.com/flutter_infra/flutter/$(upstreamVersion)/android-arm-$mode/$platform-x64.zip 2> /dev/null

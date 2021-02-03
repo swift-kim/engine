@@ -165,6 +165,29 @@ if (current_toolchain == host_toolchain) {
   }
 }
 
+action("icudtl_object") {
+  script = "//flutter/sky/tools/objcopy.py"
+
+  objcopy = "$custom_toolchain/bin/$custom_target_triple-objcopy"
+  icudtl_input = "//third_party/icu/flutter/icudtl.dat"
+  icudtl_output = "$root_build_dir/flutter_icu/icudtl.o"
+
+  inputs = [ "$icudtl_input" ]
+
+  outputs = [ "$icudtl_output" ]
+
+  args = [
+    "--objcopy",
+    rebase_path(objcopy),
+    "--input",
+    rebase_path(icudtl_input),
+    "--output",
+    rebase_path(icudtl_output),
+    "--arch",
+    current_cpu,
+  ]
+}
+
 shared_library("flutter_engine_library") {
   visibility = [ ":*" ]
 
@@ -174,7 +197,9 @@ shared_library("flutter_engine_library") {
     ldflags = [ "-Wl,-install_name,@rpath/FlutterEmbedder.framework/$_framework_binary_subpath" ]
   }
 
-  deps = [ ":embedder" ]
+  sources = [ "$root_build_dir/flutter_icu/icudtl.o" ]
+
+  deps = [ ":embedder", ":icudtl_object" ]
 
   public_configs = [ "//flutter:config" ]
 }
