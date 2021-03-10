@@ -177,8 +177,8 @@ bool TizenEmbedderEngine::RunEngine(
     return false;
   }
 
-  std::unique_ptr<FlutterTextureRegistrar> textures =
-      std::make_unique<FlutterTextureRegistrar>();
+  std::unique_ptr<FlutterDesktopTextureRegistrar> textures =
+      std::make_unique<FlutterDesktopTextureRegistrar>();
   textures->flutter_engine = flutter_engine;
   plugin_registrar_ = std::make_unique<FlutterDesktopPluginRegistrar>();
   plugin_registrar_->engine = this;

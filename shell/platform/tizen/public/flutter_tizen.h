@@ -82,9 +82,6 @@ FLUTTER_EXPORT void FlutterNotifyAppIsPaused(
 FLUTTER_EXPORT void FlutterNotifyAppIsDetached(
     FlutterWindowControllerRef controller);
 
-FLUTTER_EXPORT void FlutterRotateWindow(FlutterWindowControllerRef controller,
-                                        int32_t degree);
-
 #if defined(__cplusplus)
 }  // extern "C"
 #endif

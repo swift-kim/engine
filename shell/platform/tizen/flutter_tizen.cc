@@ -9,7 +9,6 @@
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/tizen/public/flutter_platform_view.h"
-#include "flutter/shell/platform/tizen/public/flutter_texture_registrar.h"
 #include "flutter/shell/platform/tizen/tizen_embedder_engine.h"
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
@@ -67,11 +66,6 @@ void FlutterDesktopPluginRegistrarSetDestructionHandler(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopOnPluginRegistrarDestroyed callback) {
   registrar->engine->SetPluginRegistrarDestructionCallback(callback);
-}
-
-FlutterTextureRegistrarRef FlutterPluginRegistrarGetTexture(
-    FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->texture_registrar.get();
 }
 
 bool FlutterDesktopMessengerSend(FlutterDesktopMessengerRef messenger,
@@ -164,14 +158,22 @@ void FlutterNotifyLowMemoryWarning(FlutterWindowControllerRef controller) {
   }
 }
 
-void FlutterRotateWindow(FlutterWindowControllerRef controller,
-                         int32_t degree) {
-  FT_LOGW("Deprecated API. Use SystemChrome.setPreferredOrientations instead.");
+void FlutterRegisterViewFactory(
+    FlutterDesktopPluginRegistrarRef registrar, const char* view_type,
+    std::unique_ptr<PlatformViewFactory> view_factory) {
+  registrar->engine->platform_view_channel->ViewFactories().insert(
+      std::pair<std::string, std::unique_ptr<PlatformViewFactory>>(
+          view_type, std::move(view_factory)));
 }
 
-int64_t FlutterRegisterExternalTexture(
-    FlutterTextureRegistrarRef texture_registrar) {
-  FT_LOGD("FlutterDesktopRegisterExternalTexture");
+FlutterDesktopTextureRegistrarRef FlutterDesktopRegistrarGetTextureRegistrar(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  return registrar->texture_registrar.get();
+}
+
+int64_t FlutterDesktopTextureRegistrarRegisterExternalTexture(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    const FlutterDesktopTextureInfo* texture_info) {
   auto texture_gl = std::make_unique<ExternalTextureGL>();
   int64_t texture_id = texture_gl->TextureId();
   texture_registrar->textures[texture_id] = std::move(texture_gl);
@@ -182,8 +184,9 @@ int64_t FlutterRegisterExternalTexture(
   return -1;
 }
 
-bool FlutterUnregisterExternalTexture(
-    FlutterTextureRegistrarRef texture_registrar, int64_t texture_id) {
+bool FlutterDesktopTextureRegistrarUnregisterExternalTexture(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    int64_t texture_id) {
   auto it = texture_registrar->textures.find(texture_id);
   if (it != texture_registrar->textures.end())
     texture_registrar->textures.erase(it);
@@ -191,27 +194,19 @@ bool FlutterUnregisterExternalTexture(
               texture_registrar->flutter_engine, texture_id) == kSuccess);
 }
 
-bool FlutterMarkExternalTextureFrameAvailable(
-    FlutterTextureRegistrarRef texture_registrar, int64_t texture_id,
-    void* tbm_surface) {
+bool FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    int64_t texture_id) {
   auto it = texture_registrar->textures.find(texture_id);
   if (it == texture_registrar->textures.end()) {
     FT_LOGE("can't find texture texture_id = %lld", texture_id);
     return false;
   }
-  if (!texture_registrar->textures[texture_id]->OnFrameAvailable(
-          (tbm_surface_h)tbm_surface)) {
-    FT_LOGE("OnFrameAvailable fail texture_id = %lld", texture_id);
-    return false;
-  }
+  // if (!texture_registrar->textures[texture_id]->OnFrameAvailable(
+  //         (tbm_surface_h)tbm_surface)) {
+  //   FT_LOGE("OnFrameAvailable fail texture_id = %lld", texture_id);
+  //   return false;
+  // }
   return (FlutterEngineMarkExternalTextureFrameAvailable(
               texture_registrar->flutter_engine, texture_id) == kSuccess);
-}
-
-void FlutterRegisterViewFactory(
-    FlutterDesktopPluginRegistrarRef registrar, const char* view_type,
-    std::unique_ptr<PlatformViewFactory> view_factory) {
-  registrar->engine->platform_view_channel->ViewFactories().insert(
-      std::pair<std::string, std::unique_ptr<PlatformViewFactory>>(
-          view_type, std::move(view_factory)));
 }

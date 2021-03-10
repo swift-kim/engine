@@ -20,7 +20,6 @@
 #include "flutter/shell/platform/tizen/channels/text_input_channel.h"
 #include "flutter/shell/platform/tizen/external_texture_gl.h"
 #include "flutter/shell/platform/tizen/key_event_handler.h"
-#include "flutter/shell/platform/tizen/public/flutter_texture_registrar.h"
 #include "flutter/shell/platform/tizen/public/flutter_tizen.h"
 #include "flutter/shell/platform/tizen/tizen_event_loop.h"
 #include "flutter/shell/platform/tizen/tizen_renderer.h"
@@ -38,7 +37,7 @@ struct FlutterDesktopPluginRegistrar {
   TizenEmbedderEngine* engine;
 
   // The plugin texture registrar handle given to API clients.
-  std::unique_ptr<FlutterTextureRegistrar> texture_registrar;
+  std::unique_ptr<FlutterDesktopTextureRegistrar> texture_registrar;
 };
 
 // State associated with the messenger used to communicate with the engine.
@@ -55,7 +54,7 @@ struct AOTDataDeleter {
 };
 
 // State associated with the texture registrar.
-struct FlutterTextureRegistrar {
+struct FlutterDesktopTextureRegistrar {
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
 
   // The texture registrar managing external texture adapters.
