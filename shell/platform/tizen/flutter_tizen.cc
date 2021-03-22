@@ -21,7 +21,9 @@ struct FlutterWindowControllerState {
 FlutterWindowControllerRef FlutterCreateWindow(
     const FlutterWindowProperties& window_properties,
     const FlutterEngineProperties& engine_properties) {
-  StartLogging();
+  if (!Logger::Init()) {
+    return nullptr;
+  }
 
   auto state = std::make_unique<FlutterWindowControllerState>();
   state->engine = std::make_unique<TizenEmbedderEngine>(window_properties);
