@@ -4,7 +4,9 @@
 
 #include "tizen_log.h"
 
+#include <dlfcn.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <unistd.h>
 
 static int stdout_pipe[2];
@@ -22,7 +24,7 @@ static void* LoggingFunction(void* arg) {
 
   while ((size = read(pipe[0], buffer, sizeof(buffer) - 1)) > 0) {
     buffer[size] = 0;
-    __dlog_print(LOG_ID_MAIN, priority, LOG_TAG, "%s", buffer);
+    dlog_internal(LOG_ID_MAIN, priority, LOG_TAG, "%s", buffer);
   }
 
   close(pipe[0]);
@@ -32,6 +34,19 @@ static void* LoggingFunction(void* arg) {
 }
 
 void StartLogging() {
+  void* handle = dlopen("libdlog.so.0", RTLD_LAZY);
+  if (!handle) {
+    fprintf(stderr, "Failed to load library: %s\n", dlerror());
+    exit(0);
+  }
+
+  *(void**)(&dlog_internal) = dlsym(handle, "__dlog_print");
+  if (!dlog_internal) {
+    fprintf(stderr, "No such symbol: %s\n", dlerror());
+    dlclose(handle);
+    exit(0);
+  }
+
   if (is_running) {
     FT_LOGD("The threads are already running.");
     return;

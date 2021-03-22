@@ -5,10 +5,14 @@
 #ifndef EMBEDDER_TIZEN_LOG_H_
 #define EMBEDDER_TIZEN_LOG_H_
 
+#include <dlfcn.h>
 #include <dlog.h>
 
 #include <cassert>
 #include <cstdlib>
+
+static void* dlog_handle = dlopen("libdlog.so.0", RTLD_LAZY);
+static void (*dlog_internal)(log_id_t, int, const char*, const char*, ...);
 
 // Start logging threads which constantly redirect stdout/stderr to dlog.
 // The threads can be started only once per process.
@@ -20,9 +24,14 @@ void StartLogging();
 #define LOG_TAG "ConsoleMessage"
 
 #undef __LOG
-#define __LOG(id, prio, tag, fmt, arg...)                              \
-  __dlog_print(id, prio, tag, "%s: %s(%d) > " fmt, __FILE__, __func__, \
-               __LINE__, ##arg);
+#define __LOG(id, prio, tag, fmt, arg...)                                 \
+  do {                                                                    \
+    if (dlog_internal == nullptr) {                                       \
+      *(void**)(&dlog_internal) = dlsym(dlog_handle, "__dlog_print");     \
+    }                                                                     \
+    dlog_internal(id, prio, tag, "%s: %s(%d) > " fmt, __FILE__, __func__, \
+                  __LINE__, ##arg);                                       \
+  } while (0)
 
 #define __FT_LOG(prio, fmt, args...) \
   __LOG(LOG_ID_MAIN, prio, LOG_TAG, fmt, ##args)
