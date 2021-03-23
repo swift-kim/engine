@@ -9,72 +9,79 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int (*dlog_internal)(log_id_t, int, const char*, const char*, ...);
+bool Logger::Init() {
+  // We cannot use dlog_print() for logging because any logs with log id
+  // LOG_ID_APPS are ignored on TV devices. There is an internal function
+  // __dlog_print() which allows a log id to be explicitly set, but the use of
+  // such undocumented API is not allowed for apps published on the app store.
+  // One way to effectively bypass the API validation process is to obtain the
+  // function's address from a library loaded in memory at runtime. Since the
+  // function should be always available for use while the app is running,
+  // dlclose() shouldn't be called on the library until the process terminates.
+  void* handle = dlopen("libdlog.so.0", RTLD_LAZY);
+  if (!handle) {
+    fprintf(stderr, "Failed to load a lib: %s\n", dlerror());
+    return false;
+  }
+  *(void**)(&dlog_vprint_) = dlsym(handle, "__dlog_vprint");
+  if (!dlog_vprint_) {
+    fprintf(stderr, "Symbol not found: %s\n", dlerror());
+    dlclose(handle);
+    return false;
+  }
 
-static int stdout_pipe[2];
-static int stderr_pipe[2];
-static pthread_t stdout_thread;
-static pthread_t stderr_thread;
-static bool is_running = false;
+  // Create and run logging threads which constantly redirect stdout/stderr to
+  // dlog. The threads can be started only once per process.
+  if (started_) {
+    return true;
+  }
+  if (pipe(stdout_pipe_) < 0 || pipe(stderr_pipe_) < 0) {
+    FT_LOGE("Failed to create pipes.");
+    return false;
+  }
+  if (dup2(stdout_pipe_[1], 1) < 0 || dup2(stderr_pipe_[1], 2) < 0) {
+    FT_LOGE("Failed to duplicate file descriptors.");
+    return false;
+  }
+  if (pthread_create(&stdout_thread_, 0, Redirect, stdout_pipe_) != 0 ||
+      pthread_create(&stderr_thread_, 0, Redirect, stderr_pipe_) != 0) {
+    FT_LOGE("Failed to create threads.");
+    return false;
+  }
+  if (pthread_detach(stdout_thread_) != 0 ||
+      pthread_detach(stderr_thread_) != 0) {
+    FT_LOGW("Failed to detach threads.");
+  }
 
-static void* LoggingFunction(void* arg) {
+  started_ = true;
+  return true;
+}
+
+void Logger::Print(int priority, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+
+  if (dlog_vprint_) {
+    dlog_vprint_(LOG_ID_MAIN, priority, tag, format, args);
+  } else {
+    fprintf(priority == DLOG_ERROR ? stderr : stdout, format, args);
+  }
+
+  va_end(args);
+}
+
+void* Logger::Redirect(void* arg) {
   int* pipe = (int*)arg;
-  int priority = pipe == stdout_pipe ? DLOG_INFO : DLOG_ERROR;
-
   ssize_t size;
   char buffer[1024];
 
   while ((size = read(pipe[0], buffer, sizeof(buffer) - 1)) > 0) {
     buffer[size] = 0;
-    dlog_internal(LOG_ID_MAIN, priority, LOG_TAG, "%s", buffer);
+    Print(pipe == stdout_pipe_ ? DLOG_INFO : DLOG_ERROR, "%s", buffer);
   }
 
   close(pipe[0]);
   close(pipe[1]);
 
   return nullptr;
-}
-
-void StartLogging() {
-  // Only __dlog_print but not dlog_print is supposed to work on TV devices.
-  // To hide the use of internal API from the API checker, assign a function
-  // pointer of __dlog_print to dlog_internal.
-  void* handle = dlopen("libdlog.so.0", RTLD_LAZY);
-  if (!handle) {
-    fprintf(stderr, "Failed to load a library: %s\n", dlerror());
-  } else {
-    *(void**)(&dlog_internal) = dlsym(handle, "__dlog_print");
-    if (!dlog_internal) {
-      fprintf(stderr, "No such symbol: %s\n", dlerror());
-      dlclose(handle);
-    }
-  }
-  if (!dlog_internal) {
-    // *(void**)(&dlog_internal) = no-op;
-  }
-
-  // Create and run logging threads which constantly redirect stdout/stderr to
-  // dlog. These threads can be started only once per process.
-  if (is_running) {
-    FT_LOGD("The threads are already running.");
-    return;
-  }
-  if (pipe(stdout_pipe) < 0 || pipe(stderr_pipe) < 0) {
-    FT_LOGE("Failed to create pipes.");
-    return;
-  }
-  if (dup2(stdout_pipe[1], 1) < 0 || dup2(stderr_pipe[1], 2) < 0) {
-    FT_LOGE("Failed to duplicate file descriptors.");
-    return;
-  }
-  if (pthread_create(&stdout_thread, 0, LoggingFunction, stdout_pipe) != 0 ||
-      pthread_create(&stderr_thread, 0, LoggingFunction, stderr_pipe) != 0) {
-    FT_LOGE("Failed to create threads.");
-    return;
-  }
-  if (pthread_detach(stdout_thread) != 0 ||
-      pthread_detach(stderr_thread) != 0) {
-    FT_LOGW("Failed to detach threads.");
-  }
-  is_running = true;
 }
