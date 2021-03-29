@@ -164,11 +164,6 @@ void FlutterNotifyLowMemoryWarning(FlutterWindowControllerRef controller) {
   }
 }
 
-void FlutterRotateWindow(FlutterWindowControllerRef controller,
-                         int32_t degree) {
-  FT_LOGW("Deprecated API. Use SystemChrome.setPreferredOrientations instead.");
-}
-
 int64_t FlutterRegisterExternalTexture(
     FlutterTextureRegistrarRef texture_registrar) {
   FT_LOGD("FlutterDesktopRegisterExternalTexture");
