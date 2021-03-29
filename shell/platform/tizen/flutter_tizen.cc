@@ -34,7 +34,7 @@ FlutterWindowControllerRef FlutterCreateWindow(
   return state.release();
 }
 
-void FlutterDestoryWindow(FlutterWindowControllerRef controller) {
+void FlutterDestroyWindow(FlutterWindowControllerRef controller) {
   if (controller->engine) {
     controller->engine->StopEngine();
   }

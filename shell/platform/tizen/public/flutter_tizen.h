@@ -60,7 +60,7 @@ FLUTTER_EXPORT FlutterDesktopPluginRegistrarRef
 FlutterDesktopGetPluginRegistrar(FlutterWindowControllerRef controller,
                                  const char* plugin_name);
 
-FLUTTER_EXPORT void FlutterDestoryWindow(FlutterWindowControllerRef controller);
+FLUTTER_EXPORT void FlutterDestroyWindow(FlutterWindowControllerRef controller);
 
 FLUTTER_EXPORT bool FlutterRunsPrecompiledCode();
 
