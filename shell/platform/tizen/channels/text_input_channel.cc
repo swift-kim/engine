@@ -277,10 +277,10 @@ TextInputChannel::TextInputChannel(flutter::BinaryMessenger* messenger,
     imf_context_ = ecore_imf_context_add(GetImfMethod());
   }
   if (imf_context_) {
-    // TODO(swift-kim): Incorrect cast from int to void*.
+    // Caution: Conversion between incompatible types (int to void*).
     ecore_imf_context_client_window_set(
         imf_context_,
-        (void*)(size_t)(engine_->tizen_renderer->GetEcoreWindowId()));
+        (void*)(intptr_t)(engine_->tizen_renderer->GetEcoreWindowId()));
     RegisterIMFCallback();
   } else {
     FT_LOGE("Failed to create imfContext");
