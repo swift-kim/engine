@@ -75,8 +75,6 @@ jobs:
     displayName: Build
     workingDirectory: $(buildroot)
     failOnStderr: true
-    env:
-      PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
   - bash: |
       flutter/tools/gn \
         --target-os linux \
