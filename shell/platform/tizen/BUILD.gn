@@ -1,68 +1,31 @@
 # Copyright 2020 Samsung Electronics Co., Ltd. All rights reserved.
-# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 import("//flutter/shell/platform/tizen/config.gni")
 
-source_set("flutter_tizen_headers") {
-  public = [
-    "public/flutter_platform_view.h",
-    "public/flutter_tizen_texture_registrar.h",
-    "public/flutter_tizen.h",
-  ]
-
-  public_deps =
-      [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
-
-  configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
-
-  public_configs =
-      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
-}
-
-config("flutter_tizen_config") {
+# Sets the rpath of dependent targets (shared libs) to $ORIGIN.
+# This assumes that the flutter_engine library exists next to the embedder
+# library when they are deployed on Tizen devices.
+config("tizen_embedder_rpath") {
   ldflags = [ "-Wl,-rpath,\$ORIGIN" ]
 }
 
-source_set("flutter_tizen") {
-  sources = [
-    "channels/key_event_channel.cc",
-    "channels/lifecycle_channel.cc",
-    "channels/localization_channel.cc",
-    "channels/navigation_channel.cc",
-    "channels/platform_channel.cc",
-    "channels/platform_view_channel.cc",
-    "channels/settings_channel.cc",
-    "channels/text_input_channel.cc",
-    "external_texture_gl.cc",
-    "flutter_tizen.cc",
-    "key_event_handler.cc",
-    "tizen_embedder_engine.cc",
-    "tizen_event_loop.cc",
-    "tizen_log.cc",
-    "tizen_renderer.cc",
-    "tizen_vsync_waiter.cc",
-    "touch_event_handler.cc",
-  ]
+source_set("flutter_engine") {
+  visibility = [ ":*" ]
 
-  configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+  libs = [ "flutter_engine" ]
 
-  public_configs = [
-    ":flutter_tizen_config",
-    "//flutter:config"
-  ]
+  lib_dirs = [ root_out_dir ]
 
-  deps = [
-    ":flutter_tizen_headers",
-    "//flutter/shell/platform/common/cpp:common_cpp",
-    "//flutter/shell/platform/common/cpp:common_cpp_input",
-    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "//flutter/shell/platform/embedder:flutter_engine",
-    "//third_party/rapidjson",
-  ]
+  public_configs = [ ":tizen_embedder_rpath" ]
 
+  deps = [ "//flutter/shell/platform/embedder:flutter_engine" ]
+}
+
+# Tizen native headers assume that the following include dirs are already
+# added to the compiler's search paths. Since we are not using the Tizen CLI
+# builder, we have to add them manually.
+config("tizen_rootstrap_include_dirs") {
   include_dirs = [
     "$custom_sysroot/usr/include",
     "$custom_sysroot/usr/include/appfw",
@@ -85,11 +48,34 @@ source_set("flutter_tizen") {
     "$custom_sysroot/usr/include/wayland-extension"
   ]
 
-  lib_dirs = [ root_out_dir, "$custom_sysroot/usr/lib" ]
+  lib_dirs = [ "$custom_sysroot/usr/lib" ]
+}
 
-  cflags_cc = [
-    "-Wno-newline-eof",
-    "-Wno-macro-redefined",
+source_set("flutter_tizen") {
+  public = [
+    "public/flutter_platform_view.h",
+    "public/flutter_tizen_texture_registrar.h",
+    "public/flutter_tizen.h",
+  ]
+
+  sources = [
+    "channels/key_event_channel.cc",
+    "channels/lifecycle_channel.cc",
+    "channels/localization_channel.cc",
+    "channels/navigation_channel.cc",
+    "channels/platform_channel.cc",
+    "channels/platform_view_channel.cc",
+    "channels/settings_channel.cc",
+    "channels/text_input_channel.cc",
+    "external_texture_gl.cc",
+    "flutter_tizen.cc",
+    "key_event_handler.cc",
+    "tizen_embedder_engine.cc",
+    "tizen_event_loop.cc",
+    "tizen_log.cc",
+    "tizen_renderer.cc",
+    "tizen_vsync_waiter.cc",
+    "touch_event_handler.cc",
   ]
 
   libs = [
@@ -102,21 +88,45 @@ source_set("flutter_tizen") {
     "ecore_imf",
     "ecore_input",
     "eina",
-    "EGL",
     "evas",
-    "flutter_engine",
+    "EGL",
     "GLESv2",
     "tbm",
     "tdm-client",
     "wayland-client",
   ]
 
+  cflags_cc = [
+    "-Wno-newline-eof",
+    "-Wno-macro-redefined",
+  ]
+
+  configs += [
+    ":tizen_rootstrap_include_dirs",
+    "//flutter/shell/platform/common/cpp:desktop_library_implementation"
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  public_deps = [ ":flutter_engine" ]
+
+  deps = [
+    "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common/cpp:common_cpp_input",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//third_party/rapidjson",
+  ]
+
   if (tizen_sdk_4) {
     sources += [ "tizen_renderer_ecore_wl.cc" ]
+
     libs += [ "ecore_wayland", "wayland-egl" ]
+
     defines = [ "FLUTTER_TIZEN_4" ]
   } else {
     sources += [ "tizen_renderer_ecore_wl2.cc" ]
+
     libs += [ "ecore_wl2" ]
   }
 }
