@@ -126,17 +126,9 @@ template("embedder_for_profile") {
       "//third_party/rapidjson",
     ]
 
-    if (tizen_sdk_4) {
-      sources += [ "tizen_renderer_ecore_wl.cc" ]
+    sources += [ "tizen_renderer_ecore_wl2.cc" ]
 
-      libs += [ "ecore_wayland", "wayland-egl" ]
-
-      defines = [ "FLUTTER_TIZEN_4" ]
-    } else {
-      sources += [ "tizen_renderer_ecore_wl2.cc" ]
-
-      libs += [ "ecore_wl2" ]
-    }
+    libs += [ "ecore_wl2" ]
   }
 }
 

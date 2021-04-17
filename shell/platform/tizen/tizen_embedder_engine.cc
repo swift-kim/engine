@@ -46,15 +46,9 @@ static double GetDeviceDpi() {
 TizenEmbedderEngine::TizenEmbedderEngine(
     const FlutterWindowProperties& window_properties)
     : device_profile(GetDeviceProfile()), device_dpi(GetDeviceDpi()) {
-#ifdef FLUTTER_TIZEN_4
-  tizen_renderer = std::make_unique<TizenRendererEcoreWl>(
-      *this, window_properties.x, window_properties.y, window_properties.width,
-      window_properties.height);
-#else
   tizen_renderer = std::make_unique<TizenRendererEcoreWl2>(
       *this, window_properties.x, window_properties.y, window_properties.width,
       window_properties.height);
-#endif
 
   // Run flutter task on Tizen main loop.
   // Tizen engine has four threads (GPU thread, UI thread, IO thread, platform
