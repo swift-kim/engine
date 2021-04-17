@@ -101,6 +101,10 @@ jobs:
       if [[ "$(arch)" != "arm64" ]]; then
         cp tizen40/out/linux_$(mode)_$(arch)/libflutter_tizen.so $OUTDIR/libflutter_tizen40.so
       fi
+      if [[ $(System.JobName) == "tizen-arm-release" ]]; then
+        mkdir $OUTDIR/common
+        cp default/out/linux_$(mode)_$(arch)/{cpp_client_wrapper,icu,public} $OUTDIR/common
+      fi
     displayName: Copy artifacts
     workingDirectory: $(buildroot)/output
     failOnStderr: true
@@ -121,19 +125,12 @@ jobs:
     path: src/flutter
   - download: current
   - bash: |
-      mkdir -p common/client_wrapper
-      ROOT=$(Pipeline.Workspace)/src/flutter/shell/platform
-      cp $ROOT/common/cpp/client_wrapper/*.{h,cc} common/client_wrapper
-      rm common/client_wrapper/{*_unittests.*,engine_method_result.cc}
-      cp -r $ROOT/common/cpp/public common
-      cp -r $ROOT/common/cpp/client_wrapper/include common/client_wrapper
-      cp $ROOT/tizen/public/*.h common/public
-      cp $ROOT/tizen/LICENSE .
-    displayName: Copy headers
+      mv $(Pipeline.Workspace)/tizen-arm-release/common .
+      rm common/client_wrapper/engine_method_result.cc
+    displayName: Copy common files
     workingDirectory: $(Build.BinariesDirectory)
     failOnStderr: true
   - bash: |
-      cp $(Pipeline.Workspace)/src/third_party/icu/flutter/icudtl.dat common
       mv $(Pipeline.Workspace)/tizen-* .
       for platform in linux windows darwin; do
         for arch in arm arm64; do
