@@ -1,6 +1,7 @@
 # Copyright 2020 Samsung Electronics Co., Ltd. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+import("//flutter/shell/platform/common/cpp/client_wrapper/publish.gni")
 import("//flutter/shell/platform/tizen/config.gni")
 
 # Sets the rpath of dependent targets (shared libs) to $ORIGIN.
@@ -21,6 +22,12 @@ source_set("flutter_engine") {
 
   deps = [ "//flutter/shell/platform/embedder:flutter_engine" ]
 }
+
+_public_headers = [
+  "public/flutter_platform_view.h",
+  "public/flutter_tizen_texture_registrar.h",
+  "public/flutter_tizen.h",
+]
 
 # Tizen native headers assume that the following include dirs are already
 # added to the compiler's search paths. Since we are not using the Tizen CLI
@@ -55,11 +62,7 @@ config("tizen_rootstrap_include_dirs") {
 # device profiles. The output library name is "flutter_tizen_[profile]".
 template("embedder_for_profile") {
   shared_library("flutter_tizen_${target_name}") {
-    public = [
-      "public/flutter_platform_view.h",
-      "public/flutter_tizen_texture_registrar.h",
-      "public/flutter_tizen.h",
-    ]
+    public = _public_headers
 
     sources = [
       "channels/key_event_channel.cc",
@@ -153,11 +156,39 @@ embedder_for_profile("common") {
   defines = [ "COMMON_PROFILE" ]
 }
 
+publish_client_wrapper_core("publish_cpp_client_wrapper") {
+  visibility = [ ":*" ]
+}
+
+_common_cpp_public_headers = [
+  "//flutter/shell/platform/common/cpp/public/flutter_export.h",
+  "//flutter/shell/platform/common/cpp/public/flutter_messenger.h",
+  "//flutter/shell/platform/common/cpp/public/flutter_plugin_registrar.h",
+  "//flutter/shell/platform/common/cpp/public/flutter_texture_registrar.h",
+]
+
+copy("publish_headers_tizen") {
+  sources = _public_headers + _common_cpp_public_headers
+
+  outputs = [ "$root_out_dir/public/{{source_file_part}}" ]
+}
+
+copy("copy_icu") {
+  visibility = [ ":*" ]
+
+  sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+
+  outputs = [ "$root_out_dir/icu/{{source_file_part}}" ]
+}
+
 group("tizen") {
   deps = [
     ":flutter_tizen_mobile",
     ":flutter_tizen_wearable",
     ":flutter_tizen_tv",
     ":flutter_tizen_common",
+    ":publish_cpp_client_wrapper",
+    ":publish_headers_tizen",
+    ":copy_icu"
   ]
 }
