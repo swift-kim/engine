@@ -24,11 +24,7 @@
 #include "flutter/shell/platform/tizen/public/flutter_tizen_texture_registrar.h"
 #include "flutter/shell/platform/tizen/tizen_event_loop.h"
 #include "flutter/shell/platform/tizen/tizen_renderer.h"
-#ifdef FLUTTER_TIZEN_4
-#include "flutter/shell/platform/tizen/tizen_renderer_ecore_wl.h"
-#else
 #include "flutter/shell/platform/tizen/tizen_renderer_ecore_wl2.h"
-#endif
 #include "flutter/shell/platform/tizen/tizen_vsync_waiter.h"
 #include "flutter/shell/platform/tizen/touch_event_handler.h"
 

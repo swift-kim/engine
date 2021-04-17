@@ -435,9 +435,7 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
       ecore_device_class_get(keyDownEvent->dev));
   ecoreKeyDownEvent.dev_subclass = EoreDeviceSubClassToEcoreIMFDeviceSubClass(
       ecore_device_subclass_get(keyDownEvent->dev));
-#ifndef FLUTTER_TIZEN_4
   ecoreKeyDownEvent.keycode = keyDownEvent->keycode;
-#endif
 
   bool isIME = strcmp(device, "ime") == 0;
 
