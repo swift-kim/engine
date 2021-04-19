@@ -78,7 +78,7 @@ jobs:
       cp out/linux_$(mode)_$(arch)/libflutter_*.so $OUTDIR
       if [[ $(System.JobName) == "tizen-arm-release" ]]; then
         mkdir $OUTDIR/common
-        cp out/linux_$(mode)_$(arch)/{cpp_client_wrapper,icu,public} $OUTDIR/common
+        cp -r out/linux_$(mode)_$(arch)/{cpp_client_wrapper,icu,public} $OUTDIR/common
       fi
     displayName: Copy artifacts
     workingDirectory: $(buildroot)
