@@ -35,14 +35,11 @@ Animator::Animator(Delegate& delegate,
       // TODO(dnfield): We should remove this logic and set the pipeline depth
       // back to 2 in this case. See
       // https://github.com/flutter/engine/pull/9132 for discussion.
-      // layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
-      //     task_runners.GetPlatformTaskRunner() ==
-      //             task_runners.GetRasterTaskRunner()
-      //         ? 1
-      //         : 2)),
-      // FIXME(bbrto21): This is a workaround to avoid flickering that occurs
-      // in evas gl direct mode.
-      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(1)),
+      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
+          task_runners.GetPlatformTaskRunner() ==
+                  task_runners.GetRasterTaskRunner()
+              ? 1
+              : 2)),
 #endif  // SHELL_ENABLE_METAL
       pending_frame_semaphore_(1),
       frame_number_(1),
