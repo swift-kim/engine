@@ -25,7 +25,6 @@ void* TizenRendererEvasGL::SetupEvasWindow(int32_t x, int32_t y, int32_t w,
 
   evas_window_ = elm_win_add(NULL, NULL, ELM_WIN_BASIC);
   elm_win_alpha_set(evas_window_, EINA_FALSE);
-  elm_win_aux_hint_add(evas_window_, "wm.policy.win.user.geometry", "1");
   evas_object_move(evas_window_, x, y);
   evas_object_resize(evas_window_, w, h);
   evas_object_raise(evas_window_);

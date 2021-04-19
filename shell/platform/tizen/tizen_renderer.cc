@@ -567,11 +567,6 @@ bool TizenRenderer::SetupEvasGL(int32_t x, int32_t y, int32_t w, int32_t h) {
   gl_config_->color_format = EVAS_GL_RGBA_8888;
   gl_config_->depth_bits = EVAS_GL_DEPTH_NONE;
   gl_config_->stencil_bits = EVAS_GL_STENCIL_NONE;
-#define EVAS_GL_OPTIONS_DIRECT_MEMORY_OPTIMIZE (1 << 12)
-#define EVAS_GL_OPTIONS_DIRECT_OVERRIDE (1 << 13)
-  gl_config_->options_bits = (Evas_GL_Options_Bits)(
-      EVAS_GL_OPTIONS_DIRECT | EVAS_GL_OPTIONS_DIRECT_MEMORY_OPTIMIZE |
-      EVAS_GL_OPTIONS_DIRECT_OVERRIDE | EVAS_GL_OPTIONS_CLIENT_SIDE_ROTATION);
 
   gl_context_ =
       evas_gl_context_version_create(evas_gl_, NULL, EVAS_GL_GLES_3_X);
