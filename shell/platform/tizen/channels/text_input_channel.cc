@@ -363,8 +363,14 @@ void TextInputChannel::SendStateUpdate(const flutter::TextInputModel& model) {
 
 bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
   bool handled = false;
+
+#ifdef TIZEN_RENDERER_EVAS_GL
+  // It is assumed that no hardware keyboard can be attached in Evas GL mode.
+  bool isIME = true;
+#else
   bool isIME = ecore_imf_context_keyboard_mode_get(imf_context_) ==
-               ECORE_IMF_INPUT_PANEL_SW_KEYBOARD_MODE;
+          ECORE_IMF_INPUT_PANEL_SW_KEYBOARD_MODE;
+#endif
 
   Ecore_IMF_Event_Key_Down ecoreKeyDownEvent;
   ecoreKeyDownEvent.keyname = keyDownEvent->keyname;
@@ -376,11 +382,7 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
       EcoreInputModifierToEcoreIMFModifier(keyDownEvent->modifiers);
   ecoreKeyDownEvent.locks =
       EcoreInputModifierToEcoreIMFLock(keyDownEvent->modifiers);
-  if (isIME) {
-    ecoreKeyDownEvent.dev_name = "ime";
-  } else {
-    ecoreKeyDownEvent.dev_name = "";
-  }
+  ecoreKeyDownEvent.dev_name = isIME ? "ime" : "";
   ecoreKeyDownEvent.keycode = keyDownEvent->keycode;
 
   if (isIME && strcmp(keyDownEvent->key, "Select") == 0) {
