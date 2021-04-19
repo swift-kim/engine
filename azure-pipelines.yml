@@ -80,6 +80,7 @@ jobs:
       if [[ $(System.JobName) == "tizen-arm-release" ]]; then
         mkdir $OUTDIR/common
         cp -r out/linux_$(mode)_$(arch)/{cpp_client_wrapper,icu,public} $OUTDIR/common
+        rm $OUTDIR/common/cpp_client_wrapper/engine_method_result.cc
       fi
     displayName: Copy artifacts
     workingDirectory: $(buildroot)
@@ -102,11 +103,6 @@ jobs:
   - download: current
   - bash: |
       mv $(Pipeline.Workspace)/tizen-arm-release/common .
-      rm common/client_wrapper/engine_method_result.cc
-    displayName: Copy common files
-    workingDirectory: $(Build.BinariesDirectory)
-    failOnStderr: true
-  - bash: |
       mv $(Pipeline.Workspace)/tizen-* .
       for platform in linux windows darwin; do
         for arch in arm arm64; do
