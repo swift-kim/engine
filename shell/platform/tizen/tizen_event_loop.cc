@@ -8,6 +8,10 @@
 #include <atomic>
 #include <utility>
 
+#ifdef TIZEN_RENDERER_EVAS_GL
+#include <Evas_GL.h>
+#endif
+
 #include "flutter/shell/platform/tizen/tizen_log.h"
 #include "flutter/shell/platform/tizen/tizen_renderer.h"
 
