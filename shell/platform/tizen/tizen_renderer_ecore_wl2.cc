@@ -217,8 +217,8 @@ TizenRenderer::TizenWindowGeometry TizenRendererEcoreWl2::GetGeometry() {
   return result;
 }
 
-int TizenRendererEcoreWl2::GetEcoreWindowId() {
-  return ecore_wl2_window_id_get(ecore_wl2_window_);
+uintptr_t TizenRendererEcoreWl2::GetWindowId() {
+  return (uintptr_t)ecore_wl2_window_id_get(ecore_wl2_window_);
 }
 
 bool TizenRendererEcoreWl2::InitializeRenderer(int32_t x, int32_t y, int32_t w,

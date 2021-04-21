@@ -538,8 +538,8 @@ TizenRenderer::TizenWindowGeometry TizenRendererEvasGL::GetGeometry() {
   return result;
 }
 
-int TizenRendererEvasGL::GetEcoreWindowId() {
-  return (int)ecore_evas_window_get(
+uintptr_t TizenRendererEvasGL::GetWindowId() {
+  return ecore_evas_window_get(
       ecore_evas_ecore_evas_get(evas_object_evas_get(graphics_adapter_)));
 }
 
