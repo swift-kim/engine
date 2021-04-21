@@ -30,7 +30,7 @@ class TizenRenderer {
   virtual void* OnProcResolver(const char* name) = 0;
 
   virtual TizenWindowGeometry GetGeometry() = 0;
-  virtual int GetEcoreWindowId() = 0;
+  virtual uintptr_t GetWindowId() = 0;
 
   // TODO: For Evas GL only.
   virtual void* GetImageHandle() { return nullptr; };

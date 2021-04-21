@@ -26,7 +26,7 @@ class TizenRendererEvasGL : public TizenRenderer {
   void* OnProcResolver(const char* name) override;
 
   TizenWindowGeometry GetGeometry() override;
-  int GetEcoreWindowId() override;
+  uintptr_t GetWindowId() override;
 
   void ResizeWithRotation(int32_t x, int32_t y, int32_t width, int32_t height,
                           int32_t angle) override;
