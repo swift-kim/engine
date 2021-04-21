@@ -369,7 +369,7 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
   bool isIME = true;
 #else
   bool isIME = ecore_imf_context_keyboard_mode_get(imf_context_) ==
-          ECORE_IMF_INPUT_PANEL_SW_KEYBOARD_MODE;
+               ECORE_IMF_INPUT_PANEL_SW_KEYBOARD_MODE;
 #endif
 
   Ecore_IMF_Event_Key_Down ecoreKeyDownEvent;
@@ -385,13 +385,13 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
   ecoreKeyDownEvent.dev_name = isIME ? "ime" : "";
   ecoreKeyDownEvent.keycode = keyDownEvent->keycode;
 
+#ifdef WEARABLE_PROFILE
   if (isIME && strcmp(keyDownEvent->key, "Select") == 0) {
-    if (engine_->device_profile == DeviceProfile::kWearable) {
-      // FIXME: for wearable
-      in_select_mode_ = true;
-      FT_LOGD("Set select mode[true]");
-    }
+    // FIXME: for wearable
+    in_select_mode_ = true;
+    FT_LOGD("Set select mode[true]");
   }
+#endif
 
   if (isIME) {
     if (!strcmp(keyDownEvent->key, "Left") ||
@@ -426,12 +426,13 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
   FT_LOGD("The %skey-event[%s] are%s filtered", isIME ? "IME " : "",
           keyDownEvent->keyname, handled ? "" : " not");
 
-  if (!handled && !strcmp(keyDownEvent->key, "Return") && in_select_mode_ &&
-      engine_->device_profile == DeviceProfile::kWearable) {
+#ifdef WEARABLE_PROFILE
+  if (!handled && !strcmp(keyDownEvent->key, "Return") && in_select_mode_) {
     in_select_mode_ = false;
     handled = true;
     FT_LOGD("Set select mode[false]");
   }
+#endif
 
   return handled;
 }
@@ -439,13 +440,14 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
 void TextInputChannel::NonIMFFallback(Ecore_Event_Key* keyDownEvent) {
   FT_LOGD("NonIMFFallback key name [%s]", keyDownEvent->keyname);
 
+#ifdef MOBILE_PROFILE
   // For mobile, fix me!
-  if (engine_->device_profile == DeviceProfile::kMobile &&
-      edit_status_ == EditStatus::kPreeditEnd) {
+  if (edit_status_ == EditStatus::kPreeditEnd) {
     SetEditStatus(EditStatus::kNone);
     FT_LOGD("Ignore key-event[%s]!", keyDownEvent->keyname);
     return;
   }
+#endif
 
   bool select = !strcmp(keyDownEvent->key, "Select");
   bool is_filtered = true;

@@ -19,36 +19,8 @@ static constexpr size_t kPlatformTaskRunnerIdentifier = 1;
 static constexpr size_t kRenderTaskRunnerIdentifier = 2;
 #endif
 
-static DeviceProfile GetDeviceProfile() {
-  char* feature_profile;
-  system_info_get_platform_string("http://tizen.org/feature/profile",
-                                  &feature_profile);
-  std::string profile(feature_profile);
-  free(feature_profile);
-
-  if (profile == "mobile") {
-    return DeviceProfile::kMobile;
-  } else if (profile == "wearable") {
-    return DeviceProfile::kWearable;
-  } else if (profile == "tv") {
-    return DeviceProfile::kTV;
-  } else if (profile == "common") {
-    return DeviceProfile::kCommon;
-  }
-  FT_LOGW("Flutter-tizen is running on an unknown device profile!");
-  return DeviceProfile::kUnknown;
-}
-
-static double GetDeviceDpi() {
-  int feature_dpi;
-  system_info_get_platform_int("http://tizen.org/feature/screen.dpi",
-                               &feature_dpi);
-  return (double)feature_dpi;
-}
-
 TizenEmbedderEngine::TizenEmbedderEngine(
-    const FlutterWindowProperties& window_properties)
-    : device_profile(GetDeviceProfile()), device_dpi(GetDeviceDpi()) {
+    const FlutterWindowProperties& window_properties) {
 #ifdef TIZEN_RENDERER_EVAS_GL
   tizen_renderer = std::make_unique<TizenRendererEvasGL>(
       *this, window_properties.x, window_properties.y, window_properties.width,
@@ -168,7 +140,7 @@ bool TizenEmbedderEngine::RunEngine(
     static_cast<TizenEventLoop*>(data)->PostTask(task, target_time_nanos);
   };
   render_task_runner.identifier = kRenderTaskRunnerIdentifier;
-#endif  
+#endif
 
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
@@ -290,6 +262,33 @@ bool TizenEmbedderEngine::OnAcquireExternalTexture(
       ->PopulateTextureWithIdentifier(width, height, texture);
 }
 
+static double GetDeviceDpi() {
+  int feature_dpi;
+  system_info_get_platform_int("http://tizen.org/feature/screen.dpi",
+                               &feature_dpi);
+  return (double)feature_dpi;
+}
+
+static double GetDeviceScaleFactor() {
+  // The scale factor is computed based on the display DPI and the current
+  // profile. A fixed DPI value (72) is used on TVs. See:
+  // https://docs.tizen.org/application/native/guides/ui/efl/multiple-screens
+  double profile_factor = 1.0;
+  double dpi = GetDeviceDpi();
+#if defined(MOBILE_PROFILE)
+  profile_factor = 0.7;
+#elif defined(WEARABLE_PROFILE)
+  profile_factor = 0.4;
+#elif defined(TV_PROFILE)
+  profile_factor = 2.0;
+  dpi = 72.0;
+#elif defined(COMMON_PROFILE)
+  profile_factor = 0.5;
+#endif
+  double scale_factor = dpi / 90.0 * profile_factor;
+  return std::max(scale_factor, 1.0);
+}
+
 void TizenEmbedderEngine::SendWindowMetrics(int32_t width, int32_t height,
                                             double pixel_ratio) {
   FlutterWindowMetricsEvent event;
@@ -297,22 +296,7 @@ void TizenEmbedderEngine::SendWindowMetrics(int32_t width, int32_t height,
   event.width = width;
   event.height = height;
   if (pixel_ratio == 0.0) {
-    // The scale factor is computed based on the display DPI and the current
-    // profile. A fixed DPI value (72) is used on TVs. See:
-    // https://docs.tizen.org/application/native/guides/ui/efl/multiple-screens
-    double profile_factor = 1.0;
-    if (device_profile == DeviceProfile::kWearable) {
-      profile_factor = 0.4;
-    } else if (device_profile == DeviceProfile::kMobile) {
-      profile_factor = 0.7;
-    } else if (device_profile == DeviceProfile::kTV) {
-      profile_factor = 2.0;
-    } else if (device_profile == DeviceProfile::kCommon) {
-      profile_factor = 0.5;
-    }
-    double dpi = device_profile == DeviceProfile::kTV ? 72.0 : device_dpi;
-    double scale_factor = dpi / 90.0 * profile_factor;
-    event.pixel_ratio = std::max(scale_factor, 1.0);
+    event.pixel_ratio = GetDeviceScaleFactor();
   } else {
     event.pixel_ratio = pixel_ratio;
   }
