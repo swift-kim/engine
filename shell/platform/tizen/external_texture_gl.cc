@@ -146,9 +146,9 @@ bool ExternalTextureGL::PopulateTextureWithIdentifier(
           "glEGLImageTargetTexture2DOES");
   glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, egl_src_image);
   if (egl_src_image) {
-    PFNEGLDESTROYIMAGEKHRPROC n_eglDestoryImageKHR =
+    PFNEGLDESTROYIMAGEKHRPROC n_eglDestroyImageKHR =
         (PFNEGLDESTROYIMAGEKHRPROC)eglGetProcAddress("eglDestroyImageKHR");
-    n_eglDestoryImageKHR(eglGetCurrentDisplay(), egl_src_image);
+    n_eglDestroyImageKHR(eglGetCurrentDisplay(), egl_src_image);
   }
 #endif
 
