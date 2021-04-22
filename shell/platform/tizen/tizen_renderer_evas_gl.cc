@@ -15,9 +15,19 @@ TizenRendererEvasGL::TizenRendererEvasGL(TizenRenderer::Delegate& delegate,
                                          int32_t h)
     : TizenRenderer(delegate) {
   InitializeRenderer(x, y, w, h);
+
+  // Clear once to remove noise.
+  OnMakeCurrent();
+  ClearColor(0, 0, 0, 0);
+  OnPresent();
 }
 
 TizenRendererEvasGL::~TizenRendererEvasGL() { DestroyRenderer(); }
+
+void TizenRendererEvasGL::ClearColor(float r, float g, float b, float a) {
+  glClearColor(r, g, b, a);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
 
 bool TizenRendererEvasGL::OnMakeCurrent() {
   if (!IsValid()) {
@@ -544,11 +554,6 @@ uintptr_t TizenRendererEvasGL::GetWindowId() {
 }
 
 void* TizenRendererEvasGL::GetImageHandle() { return (void*)graphics_adapter_; }
-
-void TizenRendererEvasGL::ClearColor(float r, float g, float b, float a) {
-  glClearColor(r, g, b, a);
-  glClear(GL_COLOR_BUFFER_BIT);
-}
 
 bool TizenRendererEvasGL::InitializeRenderer(int32_t x, int32_t y, int32_t w,
                                              int32_t h) {

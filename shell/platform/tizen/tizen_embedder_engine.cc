@@ -53,10 +53,6 @@ TizenEmbedderEngine::TizenEmbedderEngine(
   tizen_renderer = std::make_unique<TizenRendererEvasGL>(
       *this, window_properties.x, window_properties.y, window_properties.width,
       window_properties.height);
-  // clear once to remove noise
-  tizen_renderer->OnMakeCurrent();
-  tizen_renderer->ClearColor(0, 0, 0, 0);
-  tizen_renderer->OnPresent();
 #else
   tizen_renderer = std::make_unique<TizenRendererEcoreWl2>(
       *this, window_properties.x, window_properties.y, window_properties.width,

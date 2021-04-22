@@ -32,10 +32,6 @@ class TizenRenderer {
   virtual TizenWindowGeometry GetGeometry() = 0;
   virtual uintptr_t GetWindowId() = 0;
 
-  // TODO: For Evas GL only.
-  virtual void* GetImageHandle() { return nullptr; };
-  virtual void ClearColor(float r, float g, float b, float a){};
-
   virtual void SetRotate(int angle) = 0;
   virtual void ResizeWithRotation(int32_t x, int32_t y, int32_t width,
                                   int32_t height, int32_t degree) = 0;
