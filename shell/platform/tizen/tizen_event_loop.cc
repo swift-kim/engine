@@ -8,12 +8,11 @@
 #include <atomic>
 #include <utility>
 
-#ifdef TIZEN_RENDERER_EVAS_GL
-#include <Evas_GL.h>
-#endif
-
 #include "flutter/shell/platform/tizen/tizen_log.h"
 #include "flutter/shell/platform/tizen/tizen_renderer.h"
+#ifdef TIZEN_RENDERER_EVAS_GL
+#include "flutter/shell/platform/tizen/tizen_renderer_evas_gl.h"
+#endif
 
 TizenEventLoop::TizenEventLoop(std::thread::id main_thread_id,
                                TaskExpiredCallback on_task_expired)
@@ -120,8 +119,9 @@ TizenRenderEventLoop::TizenRenderEventLoop(std::thread::id main_thread_id,
     : TizenEventLoop(main_thread_id, on_task_expired),
       tizen_renderer_(tizen_renderer) {
   evas_object_image_pixels_get_callback_set(
-      (Evas_Object*)tizen_renderer_->GetImageHandle(),
-      [](void* data, Evas_Object* o) {  // Render call back
+      (Evas_Object*)static_cast<TizenRendererEvasGL*>(tizen_renderer_)
+          ->GetImageHandle(),
+      [](void* data, Evas_Object* o) {  // Render callback
         TizenRenderEventLoop* self = (TizenRenderEventLoop*)data;
         {
           std::lock_guard<std::mutex> lock(self->expired_tasks_mutex_);
@@ -141,9 +141,11 @@ void TizenRenderEventLoop::OnTaskExpired() {
   size_t expired_tasks_count = 0;
   std::lock_guard<std::mutex> lock(expired_tasks_mutex_);
   expired_tasks_count = expired_tasks_.size();
-  if (has_pending_renderer_callback_ == false && expired_tasks_count) {
+  if (!has_pending_renderer_callback_ && expired_tasks_count) {
     evas_object_image_pixels_dirty_set(
-        (Evas_Object*)tizen_renderer_->GetImageHandle(), EINA_TRUE);
+        (Evas_Object*)static_cast<TizenRendererEvasGL*>(tizen_renderer_)
+            ->GetImageHandle(),
+        EINA_TRUE);
     has_pending_renderer_callback_ = true;
   } else {
     // Do nothing

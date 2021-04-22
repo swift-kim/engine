@@ -31,9 +31,8 @@ class TizenRendererEvasGL : public TizenRenderer {
   void ResizeWithRotation(int32_t x, int32_t y, int32_t width, int32_t height,
                           int32_t angle) override;
   void SetRotate(int angle) override;
-  
-  void* GetImageHandle() override;
-  void ClearColor(float r, float g, float b, float a) override;
+
+  void* GetImageHandle();
 
  protected:
   bool InitializeRenderer(int32_t x, int32_t y, int32_t w, int32_t h) override;
@@ -43,6 +42,8 @@ class TizenRendererEvasGL : public TizenRenderer {
   void SendRotationChangeDone() override;
 
  private:
+  void ClearColor(float r, float g, float b, float a);
+
   bool SetupEvasGL(int32_t x, int32_t y, int32_t w, int32_t h);
   void* SetupEvasWindow(int32_t x, int32_t y, int32_t w, int32_t h);
   void DestroyEvasGL();
