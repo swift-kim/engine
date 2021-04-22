@@ -52,11 +52,11 @@ class TizenRendererEvasGL : public TizenRenderer {
   Evas_Object* evas_window_{nullptr};
   Evas_Object* graphics_adapter_{nullptr};
 
-  Evas_GL_Config* gl_config_;
+  Evas_GL_Config* gl_config_{nullptr};
   Evas_GL* evas_gl_{nullptr};
 
-  Evas_GL_Context* gl_context_;
-  Evas_GL_Context* gl_resource_context_;
+  Evas_GL_Context* gl_context_{nullptr};
+  Evas_GL_Context* gl_resource_context_{nullptr};
 
   Evas_GL_Surface* gl_surface_{nullptr};
   Evas_GL_Surface* gl_resource_surface_{nullptr};

@@ -94,7 +94,7 @@ class TizenRenderEventLoop : public TizenEventLoop {
   virtual void OnTaskExpired() override;
 
  private:
-  TizenRenderer* tizen_renderer_;
+  TizenRenderer* tizen_renderer_{nullptr};
   std::atomic_bool has_pending_renderer_callback_{false};
 };
 #endif
