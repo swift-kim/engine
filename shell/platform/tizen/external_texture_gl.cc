@@ -86,13 +86,12 @@ bool ExternalTextureGL::PopulateTextureWithIdentifier(
   }
 
 #ifdef TIZEN_RENDERER_EVAS_GL
-  int eglImgAttr[] = {EVAS_GL_IMAGE_PRESERVED, GL_TRUE, 0};
+  int attribs[] = {EVAS_GL_IMAGE_PRESERVED, GL_TRUE, 0};
   EvasGLImage egl_src_image = evasglCreateImageForContext(
       g_evas_gl, evas_gl_current_context_get(g_evas_gl),
       EVAS_GL_NATIVE_SURFACE_TIZEN, (void*)(intptr_t)texture_tbm_surface_,
-      eglImgAttr);
+      attribs);
   if (!egl_src_image) {
-    // FT_LOGE("egl_src_image create fail!!, errorcode == %d", eglGetError());
     mutex_.unlock();
     return false;
   }
@@ -117,11 +116,11 @@ bool ExternalTextureGL::PopulateTextureWithIdentifier(
 #else
   PFNEGLCREATEIMAGEKHRPROC n_eglCreateImageKHR =
       (PFNEGLCREATEIMAGEKHRPROC)eglGetProcAddress("eglCreateImageKHR");
-  const EGLint attrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE,
-                          EGL_NONE};
+  const EGLint attribs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE,
+                            EGL_NONE};
   EGLImageKHR egl_src_image = n_eglCreateImageKHR(
       eglGetCurrentDisplay(), EGL_NO_CONTEXT, EGL_NATIVE_SURFACE_TIZEN,
-      (EGLClientBuffer)texture_tbm_surface_, attrs);
+      (EGLClientBuffer)texture_tbm_surface_, attribs);
   if (!egl_src_image) {
     FT_LOGE("egl_src_image create fail!!, errorcode == %d", eglGetError());
     mutex_.unlock();

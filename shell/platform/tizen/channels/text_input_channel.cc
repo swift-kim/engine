@@ -363,7 +363,7 @@ bool TextInputChannel::FilterEvent(Ecore_Event_Key* keyDownEvent) {
   bool handled = false;
 
 #ifdef TIZEN_RENDERER_EVAS_GL
-  // It is assumed that no hardware keyboard can be attached in Evas GL mode.
+  // TODO: Hardware keyboard not supported when running in Evas GL mode.
   bool isIME = true;
 #else
   bool isIME = ecore_imf_context_keyboard_mode_get(imf_context_) ==

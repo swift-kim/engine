@@ -65,13 +65,14 @@ bool TizenRendererEvasGL::OnMakeResourceCurrent() {
 }
 
 bool TizenRendererEvasGL::OnPresent() {
-  if (!is_valid_) {
+  if (!IsValid()) {
     FT_LOGE("Invalid TizenRenderer");
     return false;
   }
-  if (received_rotation) {
+
+  if (received_rotation_) {
     SendRotationChangeDone();
-    received_rotation = false;
+    received_rotation_ = false;
   }
 
   return true;
@@ -580,7 +581,6 @@ bool TizenRendererEvasGL::SetupEvasGL(int32_t x, int32_t y, int32_t w,
                                       int32_t h) {
   evas_gl_ = evas_gl_new(
       evas_object_evas_get((Evas_Object*)SetupEvasWindow(x, y, w, h)));
-
   if (!evas_gl_) {
     FT_LOGE("SetupEvasWindow fail");
     return false;
@@ -686,7 +686,7 @@ void TizenRendererEvasGL::RotationEventCb(void* data, Evas_Object* obj,
 
 void TizenRendererEvasGL::SetRotate(int angle) {
   elm_win_rotation_set(evas_window_, angle);
-  received_rotation = true;
+  received_rotation_ = true;
 }
 
 void TizenRendererEvasGL::ResizeWithRotation(int32_t x, int32_t y,

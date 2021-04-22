@@ -61,14 +61,14 @@ bool TizenRendererEcoreWl2::OnMakeResourceCurrent() {
 }
 
 bool TizenRendererEcoreWl2::OnPresent() {
-  if (!is_valid_) {
+  if (!IsValid()) {
     FT_LOGE("Invalid TizenRenderer");
     return false;
   }
 
-  if (received_rotation) {
+  if (received_rotation_) {
     SendRotationChangeDone();
-    received_rotation = false;
+    received_rotation_ = false;
   }
 
   if (eglSwapBuffers(egl_display_, egl_surface_) != EGL_TRUE) {
@@ -224,21 +224,19 @@ uintptr_t TizenRendererEcoreWl2::GetWindowId() {
 bool TizenRendererEcoreWl2::InitializeRenderer(int32_t x, int32_t y, int32_t w,
                                                int32_t h) {
   if (!SetupDisplay()) {
-    FT_LOGE("setupDisplay fail");
+    FT_LOGE("SetupDisplay fail");
     return false;
   }
   if (!SetupEcoreWlWindow(x, y, w, h)) {
     FT_LOGE("SetupEcoreWlWindow fail");
     return false;
   }
-
   if (!SetupEglWindow(w, h)) {
     FT_LOGE("SetupEglWindow fail");
     return false;
   }
-
   if (!SetupEglSurface()) {
-    FT_LOGE("setupEglSurface fail");
+    FT_LOGE("SetupEglSurface fail");
     return false;
   }
   Show();
@@ -262,7 +260,7 @@ bool TizenRendererEcoreWl2::SetupDisplay() {
   }
   ecore_wl2_display_ = ecore_wl2_display_connect(nullptr);
   if (ecore_wl2_display_ == nullptr) {
-    FT_LOGE("Disyplay not found");
+    FT_LOGE("Display not found");
     return false;
   }
   FT_LOGD("ecore_wl2_display_: %p", ecore_wl2_display_);
@@ -332,40 +330,44 @@ bool TizenRendererEcoreWl2::SetupEglSurface() {
     FT_LOGE("ChooseEGLConfiguration fail");
     return false;
   }
-  const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
+  const EGLint context_attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
   egl_context_ = eglCreateContext(egl_display_, egl_config_, EGL_NO_CONTEXT,
-                                  contextAttribs);
+                                  context_attribs);
   if (EGL_NO_CONTEXT == egl_context_) {
     PrintEGLError();
     return false;
   }
 
-  egl_resource_context_ =
-      eglCreateContext(egl_display_, egl_config_, egl_context_, contextAttribs);
+  egl_resource_context_ = eglCreateContext(egl_display_, egl_config_,
+                                           egl_context_, context_attribs);
   if (EGL_NO_CONTEXT == egl_resource_context_) {
     PrintEGLError();
     return false;
   }
+
   EGLint *ptr = nullptr;
-  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
   egl_surface_ = eglCreateWindowSurface(egl_display_, egl_config_,
                                         GetEGLNativeWindowType(), ptr);
   if (egl_surface_ == EGL_NO_SURFACE) {
     FT_LOGE("eglCreateWindowSurface failed");
     return false;
   }
+
+  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
   egl_resource_surface_ =
       eglCreatePbufferSurface(egl_display_, egl_config_, attribs);
   if (egl_resource_surface_ == EGL_NO_SURFACE) {
     FT_LOGE("eglCreatePbufferSurface is Failed");
     return false;
   }
+
   return true;
 }
 
 bool TizenRendererEcoreWl2::ChooseEGLConfiguration() {
   // egl CONTEXT
-  EGLint configAttribs[] = {
+  EGLint config_attribs[] = {
       // clang-format off
       EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
       EGL_RED_SIZE,        8,
@@ -381,7 +383,7 @@ bool TizenRendererEcoreWl2::ChooseEGLConfiguration() {
 
   EGLint major = 0;
   EGLint minor = 0;
-  int bufferSize = 32;
+  int buffer_size = 32;
   egl_display_ = GetEGLDisplay();
   if (EGL_NO_DISPLAY == egl_display_) {
     FT_LOGE("EGL Get Display is failed");
@@ -399,18 +401,19 @@ bool TizenRendererEcoreWl2::ChooseEGLConfiguration() {
     return false;
   }
 
-  EGLint numOfConfig = 0;
+  EGLint num_config = 0;
   // Query all framebuffer configurations
-  if (!eglGetConfigs(egl_display_, NULL, 0, &numOfConfig)) {
+  if (!eglGetConfigs(egl_display_, NULL, 0, &num_config)) {
     FT_LOGE("eglGetConfigs is Failed!!");
     PrintEGLError();
     return false;
   }
-  EGLConfig *configs = (EGLConfig *)calloc(numOfConfig, sizeof(EGLConfig));
-  EGLint n;
-  // Get the List of EGL framebuffer configuration matches with configAttribs in
-  // list "configs"
-  if (!eglChooseConfig(egl_display_, configAttribs, configs, numOfConfig, &n)) {
+  EGLConfig *configs = (EGLConfig *)calloc(num_config, sizeof(EGLConfig));
+  EGLint num;
+  // Get the List of EGL framebuffer configuration matches with config_attribs
+  // in list "configs"
+  if (!eglChooseConfig(egl_display_, config_attribs, configs, num_config,
+                       &num)) {
     free(configs);
     configs = NULL;
     PrintEGLError();
@@ -418,9 +421,9 @@ bool TizenRendererEcoreWl2::ChooseEGLConfiguration() {
   }
 
   EGLint size;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < num; i++) {
     eglGetConfigAttrib(egl_display_, configs[i], EGL_BUFFER_SIZE, &size);
-    if (bufferSize == size) {
+    if (buffer_size == size) {
       egl_config_ = configs[i];
       break;
     }
@@ -459,7 +462,7 @@ void TizenRendererEcoreWl2::PrintEGLError() {
           "EGL_BAD_MATCH : Draw or read are not compatible with context, or if "
           "context is set to EGL_NO_CONTEXT and draw or read are not set to "
           "EGL_NO_SURFACE, or if draw or read are set to EGL_NO_SURFACE and "
-          "context is not set to EGL_NO_CONTEXT\n");
+          "context is not set to EGL_NO_CONTEXT");
       break;
     }
     case EGL_BAD_ACCESS: {
@@ -557,7 +560,7 @@ Eina_Bool TizenRendererEcoreWl2::RotationEventCb(void *data, int type,
 
 void TizenRendererEcoreWl2::SetRotate(int angle) {
   ecore_wl2_window_rotation_set(ecore_wl2_window_, angle);
-  received_rotation = true;
+  received_rotation_ = true;
 }
 
 void TizenRendererEcoreWl2::ResizeWithRotation(int32_t x, int32_t y,

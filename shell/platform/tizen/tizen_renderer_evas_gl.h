@@ -34,15 +34,12 @@ class TizenRendererEvasGL : public TizenRenderer {
 
   void* GetImageHandle();
 
- protected:
-  bool InitializeRenderer(int32_t x, int32_t y, int32_t w, int32_t h) override;
-  void Show() override;
-  void DestroyRenderer() override;
-
-  void SendRotationChangeDone() override;
-
  private:
   void ClearColor(float r, float g, float b, float a);
+
+  bool InitializeRenderer(int32_t x, int32_t y, int32_t w, int32_t h);
+  void Show();
+  void DestroyRenderer();
 
   bool SetupEvasGL(int32_t x, int32_t y, int32_t w, int32_t h);
   void* SetupEvasWindow(int32_t x, int32_t y, int32_t w, int32_t h);
@@ -50,6 +47,7 @@ class TizenRendererEvasGL : public TizenRenderer {
   void DestroyEvasWindow();
 
   static void RotationEventCb(void* data, Evas_Object* obj, void* event_info);
+  void SendRotationChangeDone();
 
   Evas_Object* evas_window_{nullptr};
   Evas_Object* graphics_adapter_{nullptr};
