@@ -8,8 +8,6 @@
 #include <atomic>
 #include <utility>
 
-#include "flutter/shell/platform/tizen/tizen_log.h"
-#include "flutter/shell/platform/tizen/tizen_renderer.h"
 #ifdef TIZEN_RENDERER_EVAS_GL
 #include "flutter/shell/platform/tizen/tizen_renderer_evas_gl.h"
 #endif
@@ -149,7 +147,6 @@ void TizenRenderEventLoop::OnTaskExpired() {
     has_pending_renderer_callback_ = true;
   } else {
     // Do nothing
-    FT_LOGD("Ignore set dirty");
   }
 }
 #endif

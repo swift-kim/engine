@@ -31,14 +31,11 @@ class TizenRendererEcoreWl2 : public TizenRenderer {
                           int32_t angle) override;
   void SetRotate(int angle) override;
 
- protected:
-  bool InitializeRenderer(int32_t x, int32_t y, int32_t w, int32_t h) override;
-  void Show() override;
-  void DestroyRenderer() override;
-
-  void SendRotationChangeDone() override;
-
  private:
+  bool InitializeRenderer(int32_t x, int32_t y, int32_t w, int32_t h);
+  void Show();
+  void DestroyRenderer();
+
   bool SetupDisplay();
   bool SetupEcoreWlWindow(int32_t x, int32_t y, int32_t w, int32_t h);
   bool SetupEglWindow(int32_t w, int32_t h);
@@ -54,6 +51,7 @@ class TizenRendererEcoreWl2 : public TizenRenderer {
   void DestroyEglSurface();
 
   static Eina_Bool RotationEventCb(void *data, int type, void *event);
+  void SendRotationChangeDone();
 
   Ecore_Wl2_Display *ecore_wl2_display_ = nullptr;
   Ecore_Wl2_Window *ecore_wl2_window_ = nullptr;

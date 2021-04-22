@@ -39,16 +39,9 @@ class TizenRenderer {
  protected:
   explicit TizenRenderer(TizenRenderer::Delegate& delegate);
 
-  virtual bool InitializeRenderer(int32_t x, int32_t y, int32_t w,
-                                  int32_t h) = 0;
-  virtual void Show() = 0;
-  virtual void DestroyRenderer() = 0;
-
-  virtual void SendRotationChangeDone() = 0;
-
   bool is_valid_ = false;
 
-  bool received_rotation{false};
+  bool received_rotation_{false};
   TizenRenderer::Delegate& delegate_;
 };
 
