@@ -10,7 +10,7 @@
 #include <Elementary.h>
 #include <Evas_GL.h>
 
-#include "tizen_renderer.h"
+#include "flutter/shell/platform/tizen/tizen_renderer.h"
 
 class TizenRendererEvasGL : public TizenRenderer {
  public:
