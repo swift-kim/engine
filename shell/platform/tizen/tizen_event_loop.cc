@@ -68,15 +68,15 @@ void TizenEventLoop::PostTask(FlutterTask flutter_task,
 }
 
 Eina_Bool TizenEventLoop::TaskTimerCallback(void* data) {
-  TizenEventLoop* tizenEventLoop = reinterpret_cast<TizenEventLoop*>(data);
-  tizenEventLoop->ExcuteTaskEvents();
+  auto* self = reinterpret_cast<TizenEventLoop*>(data);
+  self->ExcuteTaskEvents();
   return EINA_FALSE;
 }
 
 void TizenEventLoop::ExcuteTaskEvents(void* data, void* buffer,
                                       unsigned int nbyte) {
-  TizenEventLoop* tizenEventLoop = reinterpret_cast<TizenEventLoop*>(data);
-  Task* p_task = reinterpret_cast<Task*>(buffer);
+  auto* self = reinterpret_cast<TizenEventLoop*>(data);
+  auto* p_task = reinterpret_cast<Task*>(buffer);
 
   const double flutter_duration =
       ((double)(p_task->fire_time.time_since_epoch().count()) -
@@ -84,16 +84,16 @@ void TizenEventLoop::ExcuteTaskEvents(void* data, void* buffer,
       1000000000.0;
   if (flutter_duration > 0) {
     {
-      std::lock_guard<std::mutex> lock(tizenEventLoop->task_queue_mutex_);
-      tizenEventLoop->task_queue_.push(*p_task);
+      std::lock_guard<std::mutex> lock(self->task_queue_mutex_);
+      self->task_queue_.push(*p_task);
     }
-    ecore_timer_add(flutter_duration, TaskTimerCallback, tizenEventLoop);
+    ecore_timer_add(flutter_duration, TaskTimerCallback, self);
   } else {
     {
-      std::lock_guard<std::mutex> lock(tizenEventLoop->expired_tasks_mutex_);
-      tizenEventLoop->expired_tasks_.push_back(p_task->task);
+      std::lock_guard<std::mutex> lock(self->expired_tasks_mutex_);
+      self->expired_tasks_.push_back(p_task->task);
     }
-    tizenEventLoop->OnTaskExpired();
+    self->OnTaskExpired();
   }
 }
 
