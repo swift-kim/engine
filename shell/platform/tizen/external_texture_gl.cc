@@ -64,6 +64,9 @@ bool ExternalTextureGL::OnFrameAvailable(tbm_surface_h tbm_surface) {
     return false;
   }
   texture_tbm_surface_ = tbm_surface;
+#ifndef WEARABLE_PROFILE
+  tbm_surface_internal_ref(texture_tbm_surface_);
+#endif
   mutex_.unlock();
   return true;
 }
@@ -173,7 +176,9 @@ void ExternalTextureGL::DestructionTbmSurface() {
     FT_LOGE("tbm_surface_h is NULL");
     return;
   }
-  tbm_surface_destroy(texture_tbm_surface_);
+#ifndef WEARABLE_PROFILE
+  tbm_surface_internal_unref(texture_tbm_surface_);
+#endif
   texture_tbm_surface_ = NULL;
 }
 
