@@ -6,6 +6,7 @@
 #ifndef EMBEDDER_TIZEN_EMBEDDER_ENGINE_H_
 #define EMBEDDER_TIZEN_EMBEDDER_ENGINE_H_
 
+#include <map>
 #include <memory>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
@@ -70,9 +71,15 @@ enum DeviceProfile { kUnknown, kMobile, kWearable, kTV, kCommon };
 // Manages state associated with the underlying FlutterEngine.
 class FlutterTizenEngine : public TizenRenderer::Delegate {
  public:
-  explicit FlutterTizenEngine(bool initialize_tizen_renderer = true);
+  explicit FlutterTizenEngine(bool headed);
   virtual ~FlutterTizenEngine();
-  void InitializeTizenRenderer();
+
+  // Prevent copying.
+  FlutterTizenEngine(FlutterTizenEngine const&) = delete;
+  FlutterTizenEngine& operator=(FlutterTizenEngine const&) = delete;
+
+  void InitializeRenderer();
+
   bool RunEngine(const FlutterDesktopEngineProperties& engine_properties);
   bool StopEngine();
 
@@ -85,23 +92,19 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
 
   void SendWindowMetrics(int32_t width, int32_t height, double pixel_ratio);
   void SetWindowOrientation(int32_t degree);
-  void SendLocales();
-  void AppIsInactive();
-  void AppIsResumed();
-  void AppIsPaused();
-  void AppIsDetached();
-  void OnRotationChange(int degree) override;
+  void OnOrientationChange(int32_t degree) override;
 
   // The Flutter engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
 
-  FlutterDesktopMessengerRef messenger() { return messenger_.get(); }
+  // The plugin messenger handle given to API clients.
+  std::unique_ptr<FlutterDesktopMessenger> messenger;
 
   // Message dispatch manager for messages from the Flutter engine.
   std::unique_ptr<flutter::IncomingMessageDispatcher> message_dispatcher;
 
   // The interface between the Flutter rasterizer and the platform.
-  std::unique_ptr<TizenRenderer> tizen_renderer;
+  std::unique_ptr<TizenRenderer> renderer;
 
   // The system channels for communicating between Flutter and the platform.
   std::unique_ptr<KeyEventChannel> key_event_channel;
@@ -116,29 +119,13 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   const DeviceProfile device_profile;
 
  private:
-  static bool MakeContextCurrent(void* user_data);
-  static bool ClearContext(void* user_data);
-  static bool Present(void* user_data);
-  static bool MakeResourceCurrent(void* user_data);
-  static uint32_t GetActiveFbo(void* user_data);
-  static FlutterTransformation Transformation(void* user_data);
-  static void* GlProcResolver(void* user_data, const char* name);
+  bool IsHeaded() { return renderer != nullptr; }
+
   static void OnFlutterPlatformMessage(
       const FlutterPlatformMessage* engine_message, void* user_data);
-#ifndef TIZEN_RENDERER_EVAS_GL
-  static void OnVsyncCallback(void* user_data, intptr_t baton);
-#endif
-
   FlutterDesktopMessage ConvertToDesktopMessage(
       const FlutterPlatformMessage& engine_message);
-  static bool OnAcquireExternalTexture(void* user_data, int64_t texture_id,
-                                       size_t width, size_t height,
-                                       FlutterOpenGLTexture* texture);
-
-  bool HasTizenRenderer();
-
-  // The plugin messenger handle given to API clients.
-  std::unique_ptr<FlutterDesktopMessenger> messenger_;
+  FlutterRendererConfig GetRendererConfig();
 
   // The handlers listening to platform events.
   std::unique_ptr<KeyEventHandler> key_event_handler_;

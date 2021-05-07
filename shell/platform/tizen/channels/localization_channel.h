@@ -21,4 +21,5 @@ class LocalizationChannel {
 
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine_;
 };
+
 #endif  // EMBEDDER_LOCALIZATION_CHANNEL_H_

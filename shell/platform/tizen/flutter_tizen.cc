@@ -58,12 +58,12 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
 
 FlutterDesktopMessengerRef FlutterDesktopEngineGetMessenger(
     FlutterDesktopEngineRef engine) {
-  return EngineFromHandle(engine)->messenger();
+  return EngineFromHandle(engine)->messenger.get();
 }
 
 FlutterDesktopMessengerRef FlutterDesktopPluginRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->engine->messenger();
+  return registrar->engine->messenger.get();
 }
 
 void FlutterDesktopPluginRegistrarSetDestructionHandler(
@@ -132,23 +132,23 @@ void FlutterDesktopMessengerSetCallback(FlutterDesktopMessengerRef messenger,
 }
 
 void FlutterDesktopNotifyLocaleChange(FlutterDesktopEngineRef engine) {
-  EngineFromHandle(engine)->SendLocales();
+  EngineFromHandle(engine)->localization_channel->SendLocales();
 }
 
 void FlutterDesktopNotifyAppIsInactive(FlutterDesktopEngineRef engine) {
-  EngineFromHandle(engine)->AppIsInactive();
+  EngineFromHandle(engine)->lifecycle_channel->AppIsInactive();
 }
 
 void FlutterDesktopNotifyAppIsResumed(FlutterDesktopEngineRef engine) {
-  EngineFromHandle(engine)->AppIsResumed();
+  EngineFromHandle(engine)->lifecycle_channel->AppIsResumed();
 }
 
 void FlutterDesktopNotifyAppIsPaused(FlutterDesktopEngineRef engine) {
-  EngineFromHandle(engine)->AppIsPaused();
+  EngineFromHandle(engine)->lifecycle_channel->AppIsPaused();
 }
 
 void FlutterDesktopNotifyAppIsDetached(FlutterDesktopEngineRef engine) {
-  EngineFromHandle(engine)->AppIsDetached();
+  EngineFromHandle(engine)->lifecycle_channel->AppIsDetached();
 }
 
 void FlutterDesktopNotifyLowMemoryWarning(FlutterDesktopEngineRef engine) {

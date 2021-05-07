@@ -223,7 +223,7 @@ TextInputChannel::TextInputChannel(flutter::BinaryMessenger* messenger,
   }
   if (imf_context_) {
     ecore_imf_context_client_window_set(
-        imf_context_, (void*)engine_->tizen_renderer->GetWindowId());
+        imf_context_, (void*)engine_->renderer->GetWindowId());
     RegisterIMFCallback();
   } else {
     FT_LOGE("Failed to create imfContext");

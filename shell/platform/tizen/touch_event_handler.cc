@@ -40,7 +40,7 @@ void TouchEventHandler::SendFlutterPointerEvent(FlutterPointerPhase phase,
   }
 
   // Correct errors caused by window rotation.
-  auto window_geometry = engine_->tizen_renderer->GetGeometry();
+  auto window_geometry = engine_->renderer->GetGeometry();
   double width = window_geometry.w;
   double height = window_geometry.h;
   double new_x = x, new_y = y;
