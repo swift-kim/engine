@@ -52,10 +52,10 @@ FlutterTizenEngine::FlutterTizenEngine(bool initialize_tizen_renderer)
         }
       });
 
-  messenger = std::make_unique<FlutterDesktopMessenger>();
-  messenger->engine = this;
+  messenger_ = std::make_unique<FlutterDesktopMessenger>();
+  messenger_->engine = this;
   message_dispatcher =
-      std::make_unique<flutter::IncomingMessageDispatcher>(messenger.get());
+      std::make_unique<flutter::IncomingMessageDispatcher>(messenger_.get());
 
   if (initialize_tizen_renderer) {
     InitializeTizenRenderer();

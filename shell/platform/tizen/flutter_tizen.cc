@@ -56,9 +56,14 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
   return EngineFromHandle(engine)->GetPluginRegistrar();
 }
 
+FlutterDesktopMessengerRef FlutterDesktopEngineGetMessenger(
+    FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->messenger();
+}
+
 FlutterDesktopMessengerRef FlutterDesktopPluginRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->engine->messenger.get();
+  return registrar->engine->messenger();
 }
 
 void FlutterDesktopPluginRegistrarSetDestructionHandler(

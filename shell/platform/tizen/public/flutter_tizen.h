@@ -57,6 +57,10 @@ FLUTTER_EXPORT FlutterDesktopPluginRegistrarRef
 FlutterDesktopGetPluginRegistrar(FlutterDesktopEngineRef engine,
                                  const char* plugin_name);
 
+// Returns the messenger associated with the engine.
+FLUTTER_EXPORT FlutterDesktopMessengerRef
+FlutterDesktopEngineGetMessenger(FlutterDesktopEngineRef engine);
+
 FLUTTER_EXPORT void FlutterDesktopNotifyLocaleChange(
     FlutterDesktopEngineRef engine);
 

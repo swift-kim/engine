@@ -95,8 +95,7 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   // The Flutter engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
 
-  // The plugin messenger handle given to API clients.
-  std::unique_ptr<FlutterDesktopMessenger> messenger;
+  FlutterDesktopMessengerRef messenger() { return messenger_.get(); }
 
   // Message dispatch manager for messages from the Flutter engine.
   std::unique_ptr<flutter::IncomingMessageDispatcher> message_dispatcher;
@@ -137,6 +136,9 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
                                        FlutterOpenGLTexture* texture);
 
   bool HasTizenRenderer();
+
+  // The plugin messenger handle given to API clients.
+  std::unique_ptr<FlutterDesktopMessenger> messenger_;
 
   // The handlers listening to platform events.
   std::unique_ptr<KeyEventHandler> key_event_handler_;
