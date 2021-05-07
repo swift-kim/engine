@@ -38,13 +38,17 @@ typedef struct {
   size_t switches_count;
 } FlutterDesktopEngineProperties;
 
-FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopCreateWindow(
-    const FlutterDesktopEngineProperties& engine_properties);
-
-FLUTTER_EXPORT void FlutterDesktopDestroyWindow(FlutterDesktopEngineRef engine);
-
+// Runs an instance of a Flutter engine with the given properties.
+//
+// If |headed| is false, the engine is run in headless mode.
 FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopRunEngine(
-    const FlutterDesktopEngineProperties& engine_properties);
+    const FlutterDesktopEngineProperties& engine_properties, bool headed);
+
+// Shuts down the given engine instance.
+//
+// |engine| is no longer valid after this call.
+FLUTTER_EXPORT void FlutterDesktopShutdownEngine(
+    FlutterDesktopEngineRef engine);
 
 // Returns the plugin registrar handle for the plugin with the given name.
 //

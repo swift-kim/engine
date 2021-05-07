@@ -25,23 +25,11 @@ static FlutterDesktopEngineRef HandleForEngine(FlutterTizenEngine* engine) {
   return reinterpret_cast<FlutterDesktopEngineRef>(engine);
 }
 
-FlutterDesktopEngineRef FlutterDesktopCreateWindow(
-    const FlutterDesktopEngineProperties& engine_properties) {
-  StartLogging();
-
-  auto engine = std::make_unique<FlutterTizenEngine>(true);
-  if (!engine->RunEngine(engine_properties)) {
-    FT_LOGE("Failed to run the Flutter engine.");
-    return nullptr;
-  }
-  return HandleForEngine(engine.release());
-}
-
 FlutterDesktopEngineRef FlutterDesktopRunEngine(
-    const FlutterDesktopEngineProperties& engine_properties) {
+    const FlutterDesktopEngineProperties& engine_properties, bool headed) {
   StartLogging();
 
-  auto engine = std::make_unique<FlutterTizenEngine>(false);
+  auto engine = std::make_unique<FlutterTizenEngine>(headed);
   if (!engine->RunEngine(engine_properties)) {
     FT_LOGE("Failed to run the Flutter engine.");
     return nullptr;
@@ -49,7 +37,7 @@ FlutterDesktopEngineRef FlutterDesktopRunEngine(
   return HandleForEngine(engine.release());
 }
 
-void FlutterDesktopDestroyWindow(FlutterDesktopEngineRef engine_ref) {
+void FlutterDesktopShutdownEngine(FlutterDesktopEngineRef engine_ref) {
   auto engine = EngineFromHandle(engine_ref);
   engine->StopEngine();
   delete engine;
