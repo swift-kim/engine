@@ -21,7 +21,9 @@ class PlatformViewChannel {
   explicit PlatformViewChannel(flutter::BinaryMessenger* messenger,
                                FlutterTizenEngine* engine);
   virtual ~PlatformViewChannel();
+
   void Dispose();
+
   std::map<std::string, std::unique_ptr<PlatformViewFactory>>& ViewFactories() {
     return view_factories_;
   }
@@ -34,14 +36,14 @@ class PlatformViewChannel {
   void DispatchCompositionEndEvent(const std::string& key);
 
  private:
+  void HandleMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue>& call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
   FlutterTizenEngine* engine_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
   std::map<std::string, std::unique_ptr<PlatformViewFactory>> view_factories_;
   std::map<int, PlatformView*> view_instances_;
-
-  void HandleMethodCall(
-      const flutter::MethodCall<flutter::EncodableValue>& call,
-      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 };
 
 #endif  //  EMBEDDER_PLATFORM_VIEW_CHANNEL_H_

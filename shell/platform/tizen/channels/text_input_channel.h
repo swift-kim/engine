@@ -22,10 +22,13 @@ class TextInputChannel {
   struct SoftwareKeyboardGeometry {
     int32_t x = 0, y = 0, w = 0, h = 0;
   };
+
   enum EditStatus { kNone, kPreeditStart, kPreeditEnd, kCommit };
+
   explicit TextInputChannel(flutter::BinaryMessenger* messenger,
                             FlutterTizenEngine* engine);
   virtual ~TextInputChannel();
+
   void OnKeyDown(Ecore_Event_Key* key);
   void OnCommit(std::string str);
   void OnPreedit(std::string str, int cursor_pos);

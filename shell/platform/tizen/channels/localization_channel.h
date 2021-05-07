@@ -12,12 +12,13 @@ class LocalizationChannel {
   explicit LocalizationChannel(FLUTTER_API_SYMBOL(FlutterEngine)
                                    flutter_engine);
   virtual ~LocalizationChannel();
+
   void SendLocales();
 
  private:
   void SendPlatformResolvedLocale();
   FlutterLocale* GetFlutterLocale(const char* locale);
-  void DestroyFlutterLocale(FlutterLocale* flutterLocale);
+  void DestroyFlutterLocale(FlutterLocale* flutter_locale);
 
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine_;
 };
