@@ -23,7 +23,7 @@ PlatformChannel::PlatformChannel(flutter::BinaryMessenger* messenger,
           std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
         HandleMethodCall(call, std::move(result));
       });
-  // renderer pointer is managed by TizenEmbedderEngine
+  // renderer pointer is managed by FlutterTizenEngine
   // !! can be nullptr in case of service application !!
   tizen_renderer_ = renderer;
 }

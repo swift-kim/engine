@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "tizen_embedder_engine.h"
+#include "flutter_tizen_engine.h"
 
 #include <system_info.h>
 
@@ -39,7 +39,7 @@ static DeviceProfile GetDeviceProfile() {
   return DeviceProfile::kUnknown;
 }
 
-TizenEmbedderEngine::TizenEmbedderEngine(bool initialize_tizen_renderer)
+FlutterTizenEngine::FlutterTizenEngine(bool initialize_tizen_renderer)
     : device_profile(GetDeviceProfile()) {
   // Run flutter task on Tizen main loop.
   // Tizen engine has four threads (GPU thread, UI thread, IO thread, platform
@@ -62,7 +62,7 @@ TizenEmbedderEngine::TizenEmbedderEngine(bool initialize_tizen_renderer)
   }
 }
 
-void TizenEmbedderEngine::InitializeTizenRenderer() {
+void FlutterTizenEngine::InitializeTizenRenderer() {
 #ifdef TIZEN_RENDERER_EVAS_GL
   tizen_renderer = std::make_unique<TizenRendererEvasGL>(*this);
 
@@ -80,7 +80,7 @@ void TizenEmbedderEngine::InitializeTizenRenderer() {
 #endif
 }
 
-TizenEmbedderEngine::~TizenEmbedderEngine() {
+FlutterTizenEngine::~FlutterTizenEngine() {
   FT_LOGD("Destroy");
   tizen_renderer = nullptr;
 }
@@ -110,8 +110,8 @@ UniqueAotDataPtr LoadAotData(std::string aot_data_path) {
   return UniqueAotDataPtr(data);
 }
 
-bool TizenEmbedderEngine::RunEngine(
-    const FlutterEngineProperties& engine_properties) {
+bool FlutterTizenEngine::RunEngine(
+    const FlutterDesktopEngineProperties& engine_properties) {
   if (HasTizenRenderer() && !tizen_renderer->IsValid()) {
     FT_LOGE("The display was not valid.");
     return false;
@@ -252,11 +252,11 @@ bool TizenEmbedderEngine::RunEngine(
   return true;
 }
 
-void TizenEmbedderEngine::OnRotationChange(int angle) {
+void FlutterTizenEngine::OnRotationChange(int angle) {
   SetWindowOrientation(angle);
 }
 
-bool TizenEmbedderEngine::StopEngine() {
+bool FlutterTizenEngine::StopEngine() {
   if (flutter_engine) {
     if (platform_view_channel) {
       platform_view_channel->Dispose();
@@ -271,34 +271,31 @@ bool TizenEmbedderEngine::StopEngine() {
   return false;
 }
 
-FlutterDesktopPluginRegistrarRef TizenEmbedderEngine::GetPluginRegistrar() {
+FlutterDesktopPluginRegistrarRef FlutterTizenEngine::GetPluginRegistrar() {
   return plugin_registrar_.get();
 }
 
-void TizenEmbedderEngine::SetPluginRegistrarDestructionCallback(
+void FlutterTizenEngine::SetPluginRegistrarDestructionCallback(
     FlutterDesktopOnPluginRegistrarDestroyed callback) {
   plugin_registrar_destruction_callback_ = callback;
 }
 
-bool TizenEmbedderEngine::OnAcquireExternalTexture(
+bool FlutterTizenEngine::OnAcquireExternalTexture(
     void* user_data, int64_t texture_id, size_t width, size_t height,
     FlutterOpenGLTexture* texture) {
-  TizenEmbedderEngine* tizen_embedder_engine =
-      reinterpret_cast<TizenEmbedderEngine*>(user_data);
-  std::lock_guard<std::mutex> lock(
-      tizen_embedder_engine->plugin_registrar_->texture_registrar->mutex);
-  auto it = tizen_embedder_engine->plugin_registrar_->texture_registrar
-                ->textures.find(texture_id);
+  auto engine = reinterpret_cast<FlutterTizenEngine*>(user_data);
+  auto texture_registrar = engine->plugin_registrar_->texture_registrar;
+  std::lock_guard<std::mutex> lock(texture_registrar->mutex);
+  auto it = texture_registrar->textures.find(texture_id);
   int ret = false;
-  if (it != tizen_embedder_engine->plugin_registrar_->texture_registrar
-                ->textures.end()) {
+  if (it != texture_registrar->textures.end()) {
     ret = it->second->PopulateTextureWithIdentifier(width, height, texture);
   }
   return ret;
 }
 
-void TizenEmbedderEngine::SendWindowMetrics(int32_t width, int32_t height,
-                                            double pixel_ratio) {
+void FlutterTizenEngine::SendWindowMetrics(int32_t width, int32_t height,
+                                           double pixel_ratio) {
   FlutterWindowMetricsEvent event;
   event.struct_size = sizeof(FlutterWindowMetricsEvent);
   event.width = width;
@@ -329,7 +326,7 @@ void TizenEmbedderEngine::SendWindowMetrics(int32_t width, int32_t height,
 
 // This must be called at least once in order to initialize the value of
 // transformation_.
-void TizenEmbedderEngine::SetWindowOrientation(int32_t degree) {
+void FlutterTizenEngine::SetWindowOrientation(int32_t degree) {
   if (!tizen_renderer) {
     return;
   }
@@ -368,21 +365,17 @@ void TizenEmbedderEngine::SetWindowOrientation(int32_t degree) {
   }
 }
 
-void TizenEmbedderEngine::SendLocales() { localization_channel->SendLocales(); }
+void FlutterTizenEngine::SendLocales() { localization_channel->SendLocales(); }
 
-void TizenEmbedderEngine::AppIsInactive() {
-  lifecycle_channel->AppIsInactive();
-}
+void FlutterTizenEngine::AppIsInactive() { lifecycle_channel->AppIsInactive(); }
 
-void TizenEmbedderEngine::AppIsResumed() { lifecycle_channel->AppIsResumed(); }
+void FlutterTizenEngine::AppIsResumed() { lifecycle_channel->AppIsResumed(); }
 
-void TizenEmbedderEngine::AppIsPaused() { lifecycle_channel->AppIsPaused(); }
+void FlutterTizenEngine::AppIsPaused() { lifecycle_channel->AppIsPaused(); }
 
-void TizenEmbedderEngine::AppIsDetached() {
-  lifecycle_channel->AppIsDetached();
-}
+void FlutterTizenEngine::AppIsDetached() { lifecycle_channel->AppIsDetached(); }
 
-void TizenEmbedderEngine::OnFlutterPlatformMessage(
+void FlutterTizenEngine::OnFlutterPlatformMessage(
     const FlutterPlatformMessage* engine_message, void* user_data) {
   if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
     FT_LOGE("Invalid message size received. Expected: %zu, received %zu",
@@ -390,23 +383,20 @@ void TizenEmbedderEngine::OnFlutterPlatformMessage(
     return;
   }
   FT_LOGD("%s", engine_message->channel);
-  TizenEmbedderEngine* tizen_embedder_engine =
-      reinterpret_cast<TizenEmbedderEngine*>(user_data);
-  auto message =
-      tizen_embedder_engine->ConvertToDesktopMessage(*engine_message);
-  tizen_embedder_engine->message_dispatcher->HandleMessage(message);
+  FlutterTizenEngine* engine = reinterpret_cast<FlutterTizenEngine*>(user_data);
+  auto message = engine->ConvertToDesktopMessage(*engine_message);
+  engine->message_dispatcher->HandleMessage(message);
 }
 
 #ifndef TIZEN_RENDERER_EVAS_GL
-void TizenEmbedderEngine::OnVsyncCallback(void* user_data, intptr_t baton) {
-  TizenEmbedderEngine* tizen_embedder_engine =
-      reinterpret_cast<TizenEmbedderEngine*>(user_data);
-  tizen_embedder_engine->tizen_vsync_waiter_->AsyncWaitForVsync(baton);
+void FlutterTizenEngine::OnVsyncCallback(void* user_data, intptr_t baton) {
+  FlutterTizenEngine* engine = reinterpret_cast<FlutterTizenEngine*>(user_data);
+  engine->tizen_vsync_waiter_->AsyncWaitForVsync(baton);
 }
 #endif
 
 // Converts a FlutterPlatformMessage to an equivalent FlutterDesktopMessage.
-FlutterDesktopMessage TizenEmbedderEngine::ConvertToDesktopMessage(
+FlutterDesktopMessage FlutterTizenEngine::ConvertToDesktopMessage(
     const FlutterPlatformMessage& engine_message) {
   FlutterDesktopMessage message = {};
   message.struct_size = sizeof(message);
@@ -417,40 +407,40 @@ FlutterDesktopMessage TizenEmbedderEngine::ConvertToDesktopMessage(
   return message;
 }
 
-bool TizenEmbedderEngine::MakeContextCurrent(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+bool FlutterTizenEngine::MakeContextCurrent(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnMakeCurrent();
 }
 
-bool TizenEmbedderEngine::ClearContext(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+bool FlutterTizenEngine::ClearContext(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnClearCurrent();
 }
 
-bool TizenEmbedderEngine::Present(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+bool FlutterTizenEngine::Present(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnPresent();
 }
 
-bool TizenEmbedderEngine::MakeResourceCurrent(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+bool FlutterTizenEngine::MakeResourceCurrent(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnMakeResourceCurrent();
 }
 
-uint32_t TizenEmbedderEngine::GetActiveFbo(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+uint32_t FlutterTizenEngine::GetActiveFbo(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnGetFBO();
 }
 
-FlutterTransformation TizenEmbedderEngine::Transformation(void* user_data) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)->transformation_;
+FlutterTransformation FlutterTizenEngine::Transformation(void* user_data) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)->transformation_;
 }
 
-void* TizenEmbedderEngine::GlProcResolver(void* user_data, const char* name) {
-  return reinterpret_cast<TizenEmbedderEngine*>(user_data)
+void* FlutterTizenEngine::GlProcResolver(void* user_data, const char* name) {
+  return reinterpret_cast<FlutterTizenEngine*>(user_data)
       ->tizen_renderer->OnProcResolver(name);
 }
 
-bool TizenEmbedderEngine::HasTizenRenderer() {
+bool FlutterTizenEngine::HasTizenRenderer() {
   return tizen_renderer != nullptr;
 }

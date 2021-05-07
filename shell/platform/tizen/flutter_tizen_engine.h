@@ -35,7 +35,7 @@
 // State associated with the plugin registrar.
 struct FlutterDesktopPluginRegistrar {
   // The engine that owns this state object.
-  TizenEmbedderEngine* engine;
+  FlutterTizenEngine* engine;
 
   // The plugin texture registrar handle given to API clients.
   std::unique_ptr<FlutterTextureRegistrar> texture_registrar;
@@ -44,7 +44,7 @@ struct FlutterDesktopPluginRegistrar {
 // State associated with the messenger used to communicate with the engine.
 struct FlutterDesktopMessenger {
   // The engine that owns this state object.
-  TizenEmbedderEngine* engine = nullptr;
+  FlutterTizenEngine* engine = nullptr;
 };
 
 // Custom deleter for FlutterEngineAOTData.
@@ -68,12 +68,12 @@ using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AOTDataDeleter>;
 enum DeviceProfile { kUnknown, kMobile, kWearable, kTV, kCommon };
 
 // Manages state associated with the underlying FlutterEngine.
-class TizenEmbedderEngine : public TizenRenderer::Delegate {
+class FlutterTizenEngine : public TizenRenderer::Delegate {
  public:
-  explicit TizenEmbedderEngine(bool initialize_tizen_renderer = true);
-  virtual ~TizenEmbedderEngine();
+  explicit FlutterTizenEngine(bool initialize_tizen_renderer = true);
+  virtual ~FlutterTizenEngine();
   void InitializeTizenRenderer();
-  bool RunEngine(const FlutterEngineProperties& engine_properties);
+  bool RunEngine(const FlutterDesktopEngineProperties& engine_properties);
   bool StopEngine();
 
   // Returns the currently configured Plugin Registrar.
