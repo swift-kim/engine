@@ -8,6 +8,18 @@ pr:
 - flutter-*-tizen
 
 jobs:
+- job: analyze
+  pool:
+    name: Default
+    demands: agent.os -equals Linux
+  steps:
+  - checkout: self
+    path: src/flutter
+  - bash: |
+      check_tidy.py --dir flutter/shell/platform/tizen
+    displayName: Verify formatting
+    workingDirectory: $(buildroot)
+    failOnStderr: true
 - job: build
   strategy:
     matrix:
