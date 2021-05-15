@@ -17,6 +17,8 @@ jobs:
     path: src/flutter
   - bash: ci/format.sh
     displayName: Verify formatting
+  - bash: ci/lint.sh
+    displayName: Clang Tidy Linter
 - job: build
   dependsOn: analyze
   strategy:

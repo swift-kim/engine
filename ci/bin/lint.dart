@@ -245,7 +245,7 @@ void main(List<String> arguments) async {
       .map<Command>((dynamic x) => parseCommand(x as Map<String, dynamic>))
       .toList();
   final Command firstCommand = buildCommands[0];
-  final String tidyPath = calcTidyPath(firstCommand);
+  final String tidyPath = 'clang-tidy-11';
   assert(tidyPath.isNotEmpty);
   final List<Command> changedFileBuildCommands =
       buildCommands.where((Command x) => containsAny(x.file, changedFiles)).toList();
