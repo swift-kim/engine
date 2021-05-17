@@ -8,7 +8,7 @@ pr:
 - flutter-*-tizen
 
 jobs:
-- job: analyze
+- job: format
   pool:
     name: Default
     demands: agent.os -equals Linux
@@ -18,7 +18,7 @@ jobs:
   - bash: ci/format.sh
     displayName: Verify formatting
 - job: build
-  dependsOn: analyze
+  dependsOn: format
   strategy:
     matrix:
       tizen-arm-release:
