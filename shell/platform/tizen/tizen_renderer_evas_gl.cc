@@ -692,7 +692,6 @@ void TizenRendererEvasGL::RotationEventCb(void* data,
                                           Evas_Object* obj,
                                           void* event_info) {
   auto* self = reinterpret_cast<TizenRendererEvasGL*>(data);
-  // TODO(bbrto21): Use current window rotation degree
   FT_UNIMPLEMENTED();
   self->delegate_.OnOrientationChange(0);
 }
