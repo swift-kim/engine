@@ -3,8 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EMBEDDER_TIZEN_EMBEDDER_ENGINE_H_
-#define EMBEDDER_TIZEN_EMBEDDER_ENGINE_H_
+#ifndef EMBEDDER_FLUTTER_TIZEN_ENGINE_H_
+#define EMBEDDER_FLUTTER_TIZEN_ENGINE_H_
 
 #include <map>
 #include <memory>
@@ -189,4 +189,4 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   FlutterTransformation transformation_;
 };
 
-#endif  // EMBEDDER_TIZEN_EMBEDDER_ENGINE_H_
+#endif  // EMBEDDER_FLUTTER_TIZEN_ENGINE_H_
