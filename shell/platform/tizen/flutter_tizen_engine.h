@@ -9,8 +9,8 @@
 #include <map>
 #include <memory>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
-#include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
+#include "flutter/shell/platform/common/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/tizen/channels/key_event_channel.h"
 #include "flutter/shell/platform/tizen/channels/lifecycle_channel.h"
