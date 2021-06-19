@@ -4,6 +4,7 @@
 
 #include "lifecycle_channel.h"
 
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
@@ -13,33 +14,31 @@ static constexpr char kResumed[] = "AppLifecycleState.resumed";
 static constexpr char kPaused[] = "AppLifecycleState.paused";
 static constexpr char kDetached[] = "AppLifecycleState.detached";
 
-LifecycleChannel::LifecycleChannel(FlutterTizenEngine* engine)
-    : engine_(engine) {}
+LifecycleChannel::LifecycleChannel(flutter::BinaryMessenger* messenger)
+    : channel_(std::make_unique<
+               flutter::BasicMessageChannel<flutter::EncodableValue>>(
+          messenger,
+          kChannelName,
+          &flutter::StandardMessageCodec::GetInstance())) {}
 
 LifecycleChannel::~LifecycleChannel() {}
 
-void LifecycleChannel::SendLifecycleMessage(const char message[]) {
-  engine_->SendPlatformMessage(kChannelName,
-                               reinterpret_cast<const uint8_t*>(message),
-                               strlen(message), nullptr, nullptr);
-}
-
 void LifecycleChannel::AppIsInactive() {
-  FT_LOGI("send app lifecycle state inactive.");
-  SendLifecycleMessage(kInactive);
+  FT_LOGI("Sending %s message.", kInactive);
+  channel_->Send(flutter::EncodableValue(kInactive));
 }
 
 void LifecycleChannel::AppIsResumed() {
-  FT_LOGI("send app lifecycle state resumed.");
-  SendLifecycleMessage(kResumed);
+  FT_LOGI("Sending %s message.", kResumed);
+  channel_->Send(flutter::EncodableValue(kResumed));
 }
 
 void LifecycleChannel::AppIsPaused() {
-  FT_LOGI("send app lifecycle state paused.");
-  SendLifecycleMessage(kPaused);
+  FT_LOGI("Sending %s message.", kPaused);
+  channel_->Send(flutter::EncodableValue(kPaused));
 }
 
 void LifecycleChannel::AppIsDetached() {
-  FT_LOGI("send app lifecycle state detached.");
-  SendLifecycleMessage(kDetached);
+  FT_LOGI("Sending %s message.", kDetached);
+  channel_->Send(flutter::EncodableValue(kDetached));
 }

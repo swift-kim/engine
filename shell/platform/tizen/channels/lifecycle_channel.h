@@ -5,21 +5,22 @@
 #ifndef EMBEDDER_LIFECYCLE_CHANNEL_H_
 #define EMBEDDER_LIFECYCLE_CHANNEL_H_
 
-class FlutterTizenEngine;
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 
 class LifecycleChannel {
  public:
-  explicit LifecycleChannel(FlutterTizenEngine* engine);
+  explicit LifecycleChannel(flutter::BinaryMessenger* messenger);
   virtual ~LifecycleChannel();
 
   void AppIsInactive();
   void AppIsResumed();
   void AppIsPaused();
   void AppIsDetached();
-  void SendLifecycleMessage(const char message[]);
 
  private:
-  FlutterTizenEngine* engine_{nullptr};
+  std::unique_ptr<flutter::BasicMessageChannel<flutter::EncodableValue>>
+      channel_;
 };
 
 #endif  // EMBEDDER_LIFECYCLE_CHANNEL_H_
