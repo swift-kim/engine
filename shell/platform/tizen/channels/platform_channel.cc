@@ -315,4 +315,5 @@ void SetData(
   string_clipboard = itr->value.GetString();
   result->Success();
 }
+
 }  // namespace Clipboard

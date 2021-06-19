@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/common/text_input_model.h"
 
 class FlutterTizenEngine;
+
 class TextInputChannel {
  public:
   struct SoftwareKeyboardGeometry {

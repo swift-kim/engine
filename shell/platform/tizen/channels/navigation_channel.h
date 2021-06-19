@@ -22,4 +22,4 @@ class NavigationChannel {
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 };
 
-#endif  //  EMBEDDER_NAVIGATION_CHANNEL_H_
+#endif  // EMBEDDER_NAVIGATION_CHANNEL_H_

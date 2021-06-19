@@ -16,6 +16,7 @@
 class FlutterTizenEngine;
 class PlatformView;
 class PlatformViewFactory;
+
 class PlatformViewChannel {
  public:
   explicit PlatformViewChannel(flutter::BinaryMessenger* messenger,
@@ -46,4 +47,4 @@ class PlatformViewChannel {
   std::map<int, PlatformView*> view_instances_;
 };
 
-#endif  //  EMBEDDER_PLATFORM_VIEW_CHANNEL_H_
+#endif  // EMBEDDER_PLATFORM_VIEW_CHANNEL_H_
