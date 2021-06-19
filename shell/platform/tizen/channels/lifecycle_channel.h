@@ -10,9 +10,11 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 
+namespace flutter {
+
 class LifecycleChannel {
  public:
-  explicit LifecycleChannel(flutter::BinaryMessenger* messenger);
+  explicit LifecycleChannel(BinaryMessenger* messenger);
   virtual ~LifecycleChannel();
 
   void AppIsInactive();
@@ -21,8 +23,9 @@ class LifecycleChannel {
   void AppIsDetached();
 
  private:
-  std::unique_ptr<flutter::BasicMessageChannel<flutter::EncodableValue>>
-      channel_;
+  std::unique_ptr<BasicMessageChannel<EncodableValue>> channel_;
 };
+
+}  // namespace flutter
 
 #endif  // EMBEDDER_LIFECYCLE_CHANNEL_H_

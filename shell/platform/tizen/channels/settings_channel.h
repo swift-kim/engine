@@ -13,9 +13,11 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "rapidjson/document.h"
 
+namespace flutter {
+
 class SettingsChannel {
  public:
-  explicit SettingsChannel(flutter::BinaryMessenger* messenger);
+  explicit SettingsChannel(BinaryMessenger* messenger);
   virtual ~SettingsChannel();
 
  private:
@@ -23,7 +25,9 @@ class SettingsChannel {
                                         void* user_data);
   void SendSettingsEvent();
 
-  std::unique_ptr<flutter::BasicMessageChannel<rapidjson::Document>> channel_;
+  std::unique_ptr<BasicMessageChannel<rapidjson::Document>> channel_;
 };
+
+}  // namespace flutter
 
 #endif  // EMBEDDER_SETTINGS_CHANNEL_H_
