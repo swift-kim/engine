@@ -5,6 +5,9 @@
 #ifndef EMBEDDER_NAVIGATION_CHANNEL_H_
 #define EMBEDDER_NAVIGATION_CHANNEL_H_
 
+#include <memory>
+#include <string>
+
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "rapidjson/document.h"

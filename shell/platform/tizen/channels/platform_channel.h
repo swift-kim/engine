@@ -5,6 +5,8 @@
 #ifndef EMBEDDER_PLATFORM_CHANNEL_H_
 #define EMBEDDER_PLATFORM_CHANNEL_H_
 
+#include <memory>
+
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/tizen/tizen_renderer.h"

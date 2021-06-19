@@ -5,6 +5,8 @@
 #ifndef EMBEDDER_LIFECYCLE_CHANNEL_H_
 #define EMBEDDER_LIFECYCLE_CHANNEL_H_
 
+#include <memory>
+
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 

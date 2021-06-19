@@ -4,6 +4,8 @@
 
 #include "settings_channel.h"
 
+#include "flutter/shell/platform/common/json_message_codec.h"
+
 static constexpr char kChannelName[] = "flutter/settings";
 static constexpr char kTextScaleFactorKey[] = "textScaleFactor";
 static constexpr char kAlwaysUse24HourFormatKey[] = "alwaysUse24HourFormat";

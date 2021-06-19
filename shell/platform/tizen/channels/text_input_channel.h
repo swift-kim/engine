@@ -9,12 +9,13 @@
 #include <Ecore_IMF.h>
 #include <Ecore_Input.h>
 
+#include <map>
 #include <string>
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
-#include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/common/text_input_model.h"
+#include "rapidjson/document.h"
 
 class FlutterTizenEngine;
 
