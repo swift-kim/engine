@@ -113,7 +113,7 @@ source_set("common_cpp") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
   ]
 
-  if (!build_tizen_shell) {
+  if (!build_tizen_shell || embedder_for_pc) {
     deps += [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
   }
 

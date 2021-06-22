@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "platform_channel.h"
+#ifndef __X64_SHELL__
 
 #include <app.h>
 #include <feedback.h>
@@ -336,3 +337,42 @@ void SetData(const MethodCall<rapidjson::Document>& call,
 }  // namespace clipboard
 
 }  // namespace flutter
+
+#else
+#include <map>
+
+#include "flutter/shell/platform/common/json_method_codec.h"
+#include "flutter/shell/platform/tizen/tizen_log.h"
+
+namespace flutter {
+
+namespace {
+constexpr char kChannelName[] = "flutter/platform";
+}
+
+PlatformChannel::PlatformChannel(BinaryMessenger* messenger,
+                                 TizenRenderer* renderer)
+    : channel_(std::make_unique<MethodChannel<rapidjson::Document>>(
+          messenger,
+          kChannelName,
+          &JsonMethodCodec::GetInstance())),
+      renderer_(renderer) {
+  channel_->SetMethodCallHandler(
+      [this](const MethodCall<rapidjson::Document>& call,
+             std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+        HandleMethodCall(call, std::move(result));
+      });
+  if (!renderer_) {
+    renderer_ = nullptr;
+  }
+}
+
+PlatformChannel::~PlatformChannel() {}
+
+void PlatformChannel::HandleMethodCall(
+    const MethodCall<rapidjson::Document>& call,
+    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  result->NotImplemented();
+}
+}  // namespace flutter
+#endif

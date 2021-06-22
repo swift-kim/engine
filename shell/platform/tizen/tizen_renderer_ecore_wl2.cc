@@ -4,6 +4,8 @@
 
 #include "tizen_renderer_ecore_wl2.h"
 
+#ifndef __X64_SHELL__
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -598,3 +600,4 @@ void TizenRendererEcoreWl2::SetPreferredOrientations(
 }
 
 }  // namespace flutter
+#endif

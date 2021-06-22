@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "localization_channel.h"
+#ifndef __X64_SHELL__
 
 #include <utils_i18n.h>
 #include <vector>
@@ -199,5 +200,35 @@ void LocalizationChannel::DestroyFlutterLocale(FlutterLocale* flutter_locale) {
     flutter_locale = nullptr;
   }
 }
-
 }  // namespace flutter
+#else
+#include <vector>
+
+#include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
+#include "flutter/shell/platform/tizen/tizen_log.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+
+namespace flutter {
+LocalizationChannel::LocalizationChannel(FlutterTizenEngine* engine)
+    : engine_(engine) {
+  if (!engine_) {
+    engine_ = nullptr;
+  }
+}
+
+LocalizationChannel::~LocalizationChannel() {}
+
+void LocalizationChannel::SendLocales() {}
+
+void LocalizationChannel::SendPlatformResolvedLocale() {}
+
+FlutterLocale* LocalizationChannel::GetFlutterLocale(const char* locale) {
+  FlutterLocale* flutter_locale = new FlutterLocale;
+  flutter_locale->struct_size = sizeof(FlutterLocale);
+  return flutter_locale;
+}
+
+void LocalizationChannel::DestroyFlutterLocale(FlutterLocale* flutter_locale) {}
+}  // namespace flutter
+#endif

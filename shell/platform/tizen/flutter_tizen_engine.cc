@@ -5,7 +5,9 @@
 
 #include "flutter_tizen_engine.h"
 
+#ifndef __X64_SHELL__
 #include <system_info.h>
+#endif
 
 #include <filesystem>
 #include <string>
@@ -23,8 +25,12 @@ namespace flutter {
 
 static DeviceProfile GetDeviceProfile() {
   char* feature_profile;
+#ifndef __X64_SHELL__
   system_info_get_platform_string("http://tizen.org/feature/profile",
                                   &feature_profile);
+#else
+  feature_profile = (char*)("pc");
+#endif
   std::string profile(feature_profile);
   free(feature_profile);
 

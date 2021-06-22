@@ -6,6 +6,8 @@
 
 #include "flutter/shell/platform/common/json_message_codec.h"
 
+#ifndef __X64_SHELL__
+
 namespace flutter {
 
 namespace {
@@ -54,3 +56,18 @@ void SettingsChannel::OnSettingsChangedCallback(system_settings_key_e key,
 }
 
 }  // namespace flutter
+
+#else
+namespace flutter {
+namespace {
+constexpr char kChannelName[] = "flutter/settings";
+}  // namespace
+SettingsChannel::SettingsChannel(BinaryMessenger* messenger)
+    : channel_(std::make_unique<BasicMessageChannel<rapidjson::Document>>(
+          messenger,
+          kChannelName,
+          &JsonMessageCodec::GetInstance())) {}
+
+SettingsChannel::~SettingsChannel() {}
+}  // namespace flutter
+#endif

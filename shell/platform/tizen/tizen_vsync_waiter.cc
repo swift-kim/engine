@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef __X64_SHELL__
 #include "tizen_vsync_waiter.h"
 
 #include <eina_thread_queue.h>
@@ -163,3 +164,4 @@ void TizenVsyncWaiter::TdmClientVblankCallback(tdm_client_vblank* vblank,
 }
 
 }  // namespace flutter
+#endif

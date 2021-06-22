@@ -33,42 +33,47 @@ _public_headers = [
 # added to the compiler's search paths. Since we are not using the Tizen CLI
 # builder, we have to add them manually.
 config("tizen_rootstrap_include_dirs") {
-  include_dirs = [
-    "$custom_sysroot/usr/include",
-    "$custom_sysroot/usr/include/appfw",
-    "$custom_sysroot/usr/include/base",
-    "$custom_sysroot/usr/include/dlog",
-    "$custom_sysroot/usr/include/ecore-1",
-    "$custom_sysroot/usr/include/ecore-imf-1",
-    "$custom_sysroot/usr/include/ecore-input-1",
-    "$custom_sysroot/usr/include/ecore-wayland-1",
-    "$custom_sysroot/usr/include/ecore-wl2-1",
-    "$custom_sysroot/usr/include/efl-1",
-    "$custom_sysroot/usr/include/eina-1",
-    "$custom_sysroot/usr/include/eina-1/eina",
-    "$custom_sysroot/usr/include/emile-1",
-    "$custom_sysroot/usr/include/eo-1",
-    "$custom_sysroot/usr/include/feedback",
-    "$custom_sysroot/usr/include/system",
-    "$custom_sysroot/usr/include/wayland-extension",
-  ]
+  local_prefix = "$custom_sysroot/usr"
+  include_dirs = []
+  if (embedder_for_pc) {
+    local_prefix = "$custom_sysroot/usr/local"
+    defines = [ "__X64_SHELL__" ]
+    include_dirs += [ local_prefix + "/include/eldbus-1" ]
+  }
+  include_dirs += [
+    local_prefix + "/include",
+    local_prefix + "/include/appfw",
+    local_prefix + "/include/base",
+    local_prefix + "/include/dlog",
+    local_prefix + "/include/ecore-1",
+    local_prefix + "/include/ecore-evas-1",
+    local_prefix + "/include/ecore-imf-1",
+    local_prefix + "/include/ecore-imf-evas-1",
+    local_prefix + "/include/ecore-input-1",
+    local_prefix + "/include/ecore-wayland-1",
+    local_prefix + "/include/ecore-wl2-1",
+    local_prefix + "/include/efl-1",
+    local_prefix + "/include/eina-1",
+    local_prefix + "/include/eina-1/eina",
+    local_prefix + "/include/emile-1",
+    local_prefix + "/include/eo-1",
+    local_prefix + "/include/feedback",
+    local_prefix + "/include/system",
+    local_prefix + "/include/wayland-extension",
 
   # Contain headers that the Evas_GL renderer depends on.
-  include_dirs += [
-    "$custom_sysroot/usr/include/ecore-con-1",
-    "$custom_sysroot/usr/include/ecore-evas-1",
-    "$custom_sysroot/usr/include/ecore-file-1",
-    "$custom_sysroot/usr/include/edje-1",
-    "$custom_sysroot/usr/include/eet-1",
-    "$custom_sysroot/usr/include/efl-1/interfaces",
-    "$custom_sysroot/usr/include/efreet-1",
-    "$custom_sysroot/usr/include/elementary-1",
-    "$custom_sysroot/usr/include/ethumb-1",
-    "$custom_sysroot/usr/include/ethumb-client-1",
-    "$custom_sysroot/usr/include/evas-1",
+    local_prefix + "/include/ecore-con-1",
+    local_prefix + "/include/ecore-file-1",
+    local_prefix + "/include/edje-1",
+    local_prefix + "/include/eet-1",
+    local_prefix + "/include/efl-1/interfaces",
+    local_prefix + "/include/efreet-1",
+    local_prefix + "/include/elementary-1",
+    local_prefix + "/include/ethumb-1",
+    local_prefix + "/include/ethumb-client-1",
+    local_prefix + "/include/evas-1",
   ]
-
-  lib_dirs = [ "$custom_sysroot/usr/lib" ]
+  lib_dirs = [ local_prefix + "/lib" ]
 }
 
 # Template for the embedder build. Used to generate embedders for different
@@ -106,25 +111,36 @@ template("embedder_for_profile") {
       "tizen_renderer.cc",
       "touch_event_handler.cc",
     ]
-
-    libs = [
-      "base-utils-i18n",
-      "capi-appfw-application",
-      "capi-base-common",
-      "capi-system-info",
-      "capi-system-system-settings",
-      "dlog",
-      "ecore",
-      "ecore_imf",
-      "ecore_input",
-      "eina",
-      "EGL",
-      "feedback",
-      "GLESv2",
-      "tbm",
-      "tdm-client",
-      "wayland-client",
-    ]
+    if (!embedder_for_pc) {
+      libs = [
+        "base-utils-i18n",
+        "capi-appfw-application",
+        "capi-base-common",
+        "capi-system-info",
+        "capi-system-system-settings",
+        "dlog",
+        "ecore",
+        "ecore_imf",
+        "ecore_input",
+        "eina",
+        "EGL",
+        "feedback",
+        "GLESv2",
+        "tbm",
+        "tdm-client",
+        "wayland-client",
+      ]
+    } else {
+      libs = [
+        "ecore",
+        "ecore_imf",
+        "ecore_input",
+        "eina",
+        "EGL",
+        "GLESv2",
+        "wayland-client",
+      ]
+    }
 
     defines = invoker.defines
 
@@ -134,7 +150,17 @@ template("embedder_for_profile") {
       libs += [
         "ecore_evas",
         "elementary",
-        "evas",
+	"evas",
+      ]
+
+      defines += [ "TIZEN_RENDERER_EVAS_GL" ]
+    } else if (embedder_for_pc) {
+      sources += [ "tizen_renderer_evas_gl.cc" ]
+
+      libs += [
+        "ecore_evas",
+        "elementary",
+	"evas",
       ]
 
       defines += [ "TIZEN_RENDERER_EVAS_GL" ]
@@ -143,8 +169,9 @@ template("embedder_for_profile") {
         "tizen_renderer_ecore_wl2.cc",
         "tizen_vsync_waiter.cc",
       ]
-
-      libs += [ "ecore_wl2" ]
+      if (!embedder_for_pc) {
+        libs += [ "ecore_wl2" ]
+      }
     }
 
     cflags_cc = [
