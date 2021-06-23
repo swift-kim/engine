@@ -21,7 +21,9 @@ class KeyEventChannel {
   explicit KeyEventChannel(BinaryMessenger* messenger);
   virtual ~KeyEventChannel();
 
-  void SendKeyEvent(Ecore_Event_Key* key, bool is_down);
+  void SendKeyEvent(Ecore_Event_Key* key,
+                    bool is_down,
+                    std::function<void(std::string, bool)> callback);
 
  private:
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> channel_;

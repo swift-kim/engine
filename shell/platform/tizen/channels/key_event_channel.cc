@@ -21,6 +21,7 @@ constexpr char kTypeKey[] = "type";
 constexpr char kModifiersKey[] = "modifiers";
 constexpr char kToolkitKey[] = "toolkit";
 constexpr char kUnicodeScalarValuesKey[] = "unicodeScalarValues";
+constexpr char kHandledKey[] = "handled";
 
 constexpr char kKeyUp[] = "keyup";
 constexpr char kKeyDown[] = "keydown";
@@ -226,7 +227,10 @@ KeyEventChannel::KeyEventChannel(BinaryMessenger* messenger)
 
 KeyEventChannel::~KeyEventChannel() {}
 
-void KeyEventChannel::SendKeyEvent(Ecore_Event_Key* key, bool is_down) {
+void KeyEventChannel::SendKeyEvent(
+    Ecore_Event_Key* key,
+    bool is_down,
+    std::function<void(std::string, bool)> callback) {
   FT_LOGI("code: %d, name: %s, mods: %d, type: %s", key->keycode, key->keyname,
           key->modifiers, is_down ? kKeyDown : kKeyUp);
 
@@ -254,7 +258,14 @@ void KeyEventChannel::SendKeyEvent(Ecore_Event_Key* key, bool is_down) {
   } else {
     event.AddMember(kTypeKey, kKeyUp, allocator);
   }
-  channel_->Send(event);
+  channel_->Send(event, [callback = std::move(callback),
+                         keyname = std::string(key->keyname)](
+                            const uint8_t* reply, size_t reply_size) {
+    auto decoded = flutter::JsonMessageCodec::GetInstance().DecodeMessage(
+        reply, reply_size);
+    bool handled = (*decoded)[kHandledKey].GetBool();
+    callback(keyname, handled);
+  });
 }
 
 }  // namespace flutter

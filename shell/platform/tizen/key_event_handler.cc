@@ -6,6 +6,8 @@
 
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
 
+#include "flutter/shell/platform/tizen/tizen_log.h"
+
 static constexpr char kPlatformBackButtonName[] = "XF86Back";
 
 namespace flutter {
@@ -30,25 +32,26 @@ Eina_Bool KeyEventHandler::OnKey(void* data, int type, void* event) {
   auto* engine = self->engine_;
   auto is_down = type == ECORE_EVENT_KEY_DOWN;
 
-  if (strcmp(key->keyname, kPlatformBackButtonName) == 0) {
-    // The device back button was pressed.
-    if (engine->navigation_channel && !is_down) {
-      engine->navigation_channel->PopRoute();
+  if (engine->text_input_channel) {
+    if (is_down) {
+      engine->text_input_channel->OnKeyDown(key);
     }
-  } else {
-    if (engine->text_input_channel) {
-      if (is_down) {
-        engine->text_input_channel->OnKeyDown(key);
-      }
-      if (engine->text_input_channel->IsSoftwareKeyboardShowing()) {
-        return ECORE_CALLBACK_PASS_ON;
-      }
-    }
-    if (engine->key_event_channel) {
-      engine->key_event_channel->SendKeyEvent(key, is_down);
+    if (engine->text_input_channel->IsSoftwareKeyboardShowing()) {
+      return ECORE_CALLBACK_PASS_ON;
     }
   }
-  return ECORE_CALLBACK_PASS_ON;
+  if (engine->key_event_channel) {
+    engine->key_event_channel->SendKeyEvent(
+        key, is_down, [engine, is_down](std::string keyname, bool handled) {
+          if (!is_down && !handled && keyname == kPlatformBackButtonName) {
+            // The device back button was pressed.
+            if (engine->navigation_channel) {
+              engine->navigation_channel->PopRoute();
+            }
+          }
+        });
+  }
+  return ECORE_CALLBACK_DONE;
 }
 
 }  // namespace flutter
