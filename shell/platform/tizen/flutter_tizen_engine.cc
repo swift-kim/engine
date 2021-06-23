@@ -330,6 +330,12 @@ void FlutterTizenEngine::SendPointerEvent(const FlutterPointerEvent& event) {
   embedder_api_.SendPointerEvent(engine_, &event, 1);
 }
 
+void FlutterTizenEngine::SendKeyEvent(const FlutterKeyEvent& event,
+                                      FlutterKeyEventCallback callback,
+                                      void* user_data) {
+  embedder_api_.SendKeyEvent(engine_, &event, callback, user_data);
+}
+
 void FlutterTizenEngine::SendWindowMetrics(int32_t width,
                                            int32_t height,
                                            double pixel_ratio) {

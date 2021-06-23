@@ -40,6 +40,18 @@ Eina_Bool KeyEventHandler::OnKey(void* data, int type, void* event) {
       return ECORE_CALLBACK_PASS_ON;
     }
   }
+
+  // FlutterKeyEvent event = {};
+  // event.struct_size = sizeof(event);
+  // event.timestamp = key->timestamp * 1000;
+  // event.type = is_down ? kFlutterKeyEventTypeDown : kFlutterKeyEventTypeUp;
+  // event.physical = ...;
+  // event.logical = ...;
+  // event.character = ...;
+  // event.synthesized = ...;
+
+  // engine->SendKeyEvent(key_event, ..., ...);
+
   if (engine->key_event_channel) {
     engine->key_event_channel->SendKeyEvent(
         key, is_down, [engine, is_down](std::string keyname, bool handled) {
