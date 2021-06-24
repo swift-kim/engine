@@ -5,5 +5,4 @@
 declare_args() {
   # Whether to build the Tizen shell.
   build_tizen_shell = false
-  embedder_for_pc = false
 }
