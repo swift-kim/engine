@@ -51,17 +51,17 @@ Eina_Bool KeyEventHandler::OnKey(void* data, int type, void* event) {
   }
 
   if (engine->key_event_channel) {
-    auto keyname = std::string(key->keyname);
     engine->key_event_channel->SendKeyEvent(
-        key, is_down, [engine, keyname, is_down](bool handled) {
-          if (handled || is_down) {
+        key, is_down,
+        [engine, keyname = std::string(key->keyname), is_down](bool handled) {
+          if (handled) {
             return;
           }
-          if (keyname == kBackKey) {
+          if (keyname == kBackKey && !is_down) {
             if (engine->navigation_channel) {
               engine->navigation_channel->PopRoute();
             }
-          } else if (keyname == kExitKey) {
+          } else if (keyname == kExitKey && !is_down) {
             ui_app_exit();
           }
         });
