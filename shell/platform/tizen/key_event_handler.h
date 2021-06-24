@@ -7,6 +7,7 @@
 
 #include <Ecore_Input.h>
 
+#include <map>
 #include <vector>
 
 namespace flutter {
@@ -19,6 +20,19 @@ class KeyEventHandler {
   virtual ~KeyEventHandler();
 
  private:
+  struct PendingResponse {
+    std::function<void(bool, uint64_t)> callback;
+    uint64_t response_id;
+  };
+
+  // Information for key events that have been sent to the framework but yet
+  // to receive the response. Indexed by response IDs.
+  std::map<uint64_t, std::unique_ptr<PendingResponse>> pending_responses_;
+
+  // A self-incrementing integer, used as the ID for the next entry for
+  // |pending_responses_|.
+  uint64_t response_id_ = 0;
+
   FlutterTizenEngine* engine_;
   std::vector<Ecore_Event_Handler*> key_event_handlers_;
 

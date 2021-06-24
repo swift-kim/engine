@@ -98,6 +98,11 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   // Informs the engine of an incoming pointer event.
   void SendPointerEvent(const FlutterPointerEvent& event);
 
+  // Informs the engine of an incoming key event.
+  void SendKeyEvent(const FlutterKeyEvent& event,
+                    FlutterKeyEventCallback callback,
+                    void* user_data);
+
   // Sends a window metrics update to the Flutter engine using current window
   // dimensions in physical
   void SendWindowMetrics(int32_t width, int32_t height, double pixel_ratio);
