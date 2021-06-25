@@ -29,7 +29,7 @@ static DeviceProfile GetDeviceProfile() {
   system_info_get_platform_string("http://tizen.org/feature/profile",
                                   &feature_profile);
 #else
-  feature_profile = (char*)("pc");
+  return DeviceProfile::kUnknown;
 #endif
   std::string profile(feature_profile);
   free(feature_profile);
