@@ -183,9 +183,15 @@ bool FlutterTizenEngine::RunEngine() {
         engine->message_dispatcher->HandleMessage(message);
       };
   args.custom_task_runners = &custom_task_runners;
+  args.log_message_callback = [](const char* tag, const char* message,
+                                 void* user_data) {
+    // TODO: Do not use __LOG().
+    __LOG(DLOG_INFO, "%s: %s", tag, message);
+  };
+
 #ifndef TIZEN_RENDERER_EVAS_GL
   if (IsHeaded()) {
-    args.vsync_callback = [](void* user_data, intptr_t baton) -> void {
+    args.vsync_callback = [](void* user_data, intptr_t baton) {
       reinterpret_cast<FlutterTizenEngine*>(user_data)
           ->tizen_vsync_waiter_->AsyncWaitForVsync(baton);
     };

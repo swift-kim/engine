@@ -4,6 +4,7 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/shell/platform/tizen/config.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("fml") {
@@ -218,6 +219,10 @@ source_set("fml") {
       "platform/posix/paths_posix.cc",
       "platform/posix/posix_wrappers_posix.cc",
     ]
+  }
+
+  if (build_tizen_shell) {
+    defines = [ "OS_TIZEN" ]
   }
 }
 

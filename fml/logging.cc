@@ -15,6 +15,9 @@
 #include <syslog.h>
 #elif defined(OS_FUCHSIA)
 #include <lib/syslog/global.h>
+#elif defined(OS_TIZEN)
+#include <dlfcn.h>
+#include <dlog/dlog.h>
 #endif
 
 namespace fml {
@@ -121,6 +124,39 @@ LogMessage::~LogMessage() {
   }
   fx_logger_log_with_source(fx_log_get_logger(), fx_severity, nullptr, file_,
                             line_, stream_.str().c_str());
+#elif defined(OS_TIZEN)
+  log_priority priority;
+  switch (severity_) {
+    case LOG_INFO:
+      priority = DLOG_INFO;
+      break;
+    case LOG_WARNING:
+      priority = DLOG_WARN;
+      break;
+    case LOG_ERROR:
+      priority = DLOG_ERROR;
+      break;
+    case LOG_FATAL:
+      priority = DLOG_FATAL;
+      break;
+    default:
+      // Unknown severity. Use INFO.
+      priority = DLOG_INFO;
+  }
+  static int (*dlog_print)(log_id_t, int, const char*, const char*, ...);
+  if (!dlog_print) {
+    void* handle = dlopen("libdlog.so.0", RTLD_LAZY);
+    if (handle) {
+      *(void**)(&dlog_print) = dlsym(handle, "__dlog_print");
+    }
+  }
+  if (dlog_print) {
+    dlog_print(LOG_ID_MAIN, priority, "ConsoleMessage", "%s",
+               stream_.str().c_str());
+  } else {
+    std::cerr << stream_.str();
+    std::cerr.flush();
+  }
 #else
   std::cerr << stream_.str();
   std::cerr.flush();
