@@ -5,8 +5,6 @@
 
 #include "flutter_tizen_engine.h"
 
-#include <system_info.h>
-
 #include <filesystem>
 #include <string>
 #include <vector>
