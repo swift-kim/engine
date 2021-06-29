@@ -14,6 +14,10 @@ config("tizen_embedder_rpath") {
   ldflags = [ "-Wl,-rpath,\$ORIGIN" ]
 }
 
+config("relative_angle_headers") {
+  include_dirs = [ "//third_party/angle/include" ]
+}
+
 source_set("flutter_engine") {
   visibility = [ ":*" ]
 
@@ -52,8 +56,6 @@ _libs_minimum = [
   "ecore_imf",
   "ecore_input",
   "eina",
-  "EGL",
-  "GLESv2",
   "wayland-client",
 ]
 
@@ -94,7 +96,7 @@ config("tizen_rootstrap_include_dirs") {
     local_prefix + "/include/system",
     local_prefix + "/include/wayland-extension",
 
-  # Contain headers that the Evas_GL renderer depends on.
+    # For Evas_GL.
     local_prefix + "/include/ecore-con-1",
     local_prefix + "/include/ecore-file-1",
     local_prefix + "/include/edje-1",
@@ -104,6 +106,7 @@ config("tizen_rootstrap_include_dirs") {
     local_prefix + "/include/elementary-1",
     local_prefix + "/include/ethumb-1",
     local_prefix + "/include/ethumb-client-1",
+    local_prefix + "/include/evas-1",
   ]
   lib_dirs = [ local_prefix + "/lib" ]
 }
@@ -136,6 +139,8 @@ template("embedder_for_profile") {
         "feedback",
         "tbm",
         "tdm-client",
+        "EGL",
+        "GLESv2",
       ]
     }
 
@@ -236,6 +241,7 @@ executable("flutter_tizen_unittests") {
   ]
 
   public_configs = [ "//flutter:config" ]
+
   configs += [
     ":tizen_rootstrap_include_dirs",
     "//flutter/shell/platform/common:desktop_library_implementation",
@@ -254,6 +260,41 @@ executable("flutter_tizen_unittests") {
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
+    "//third_party/rapidjson",
+  ]
+}
+
+executable("flutter_tizen_shell") {
+  public = _public_headers
+  sources = _flutter_tizen_source
+  sources += [ "tizen_renderer_evas_gl.cc" ]
+  sources += [ "flutter_tizen_shell.cc" ]
+  libs = _libs_minimum
+  libs += [
+    "ecore_evas",
+    "elementary",
+    "evas",
+  ]
+
+  defines = [ "TIZEN_RENDERER_EVAS_GL" ]
+  cflags_cc = [
+    "-Wno-newline-eof",
+    "-Wno-macro-redefined",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+  configs += [
+    ":tizen_rootstrap_include_dirs",
+    "//flutter/shell/platform/common:desktop_library_implementation",
+  ]
+  public_deps = [ ":flutter_engine" ]
+  deps = [
+    "//flutter/runtime:libdart",
+    "//flutter/shell/platform/common:common_cpp",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_library_headers",
+    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/embedder:embedder_headers",
     "//third_party/rapidjson",
   ]
 }
@@ -293,4 +334,7 @@ group("tizen") {
     ":publish_cpp_client_wrapper",
     ":publish_headers_tizen",
   ]
+  if (enable_desktop_embeddings) {
+    deps += [ ":flutter_tizen_shell" ]
+  }
 }
