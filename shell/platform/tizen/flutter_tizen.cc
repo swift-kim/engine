@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
+#include "flutter/shell/platform/tizen/flutter_project_bundle.h"
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
 #include "flutter/shell/platform/tizen/public/flutter_platform_view.h"
 #include "flutter/shell/platform/tizen/tizen_log.h"
@@ -29,8 +30,9 @@ FlutterDesktopEngineRef FlutterDesktopRunEngine(
     bool headed) {
   flutter::StartLogging();
 
-  auto engine = std::make_unique<flutter::FlutterTizenEngine>(headed);
-  if (!engine->RunEngine(engine_properties)) {
+  flutter::FlutterProjectBundle project(engine_properties);
+  auto engine = std::make_unique<flutter::FlutterTizenEngine>(project, headed);
+  if (!engine->RunEngine()) {
     FT_LOGE("Failed to run the Flutter engine.");
     return nullptr;
   }

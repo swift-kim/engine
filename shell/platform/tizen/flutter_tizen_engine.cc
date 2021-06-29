@@ -5,7 +5,7 @@
 
 #include "flutter_tizen_engine.h"
 
-#include <filesystem>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -33,7 +33,10 @@ constexpr double kProfileFactor = 1.0;
 
 }  // namespace
 
-FlutterTizenEngine::FlutterTizenEngine(bool headed) {
+FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project,
+                                       bool headed)
+    : project_(std::make_unique<FlutterProjectBundle>(project)),
+      aot_data_(nullptr, nullptr) {
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
 
@@ -88,52 +91,38 @@ void FlutterTizenEngine::NotifyLowMemoryWarning() {
   embedder_api_.NotifyLowMemoryWarning(engine_);
 }
 
-// Attempts to load AOT data from the given path, which must be absolute and
-// non-empty. Logs and returns nullptr on failure.
-UniqueAotDataPtr FlutterTizenEngine::LoadAotData(std::string aot_data_path) {
-  if (aot_data_path.empty()) {
-    FT_LOGE(
-        "Attempted to load AOT data, but no aot_library_path was provided.");
-    return nullptr;
-  }
-  if (!std::filesystem::exists(aot_data_path)) {
-    FT_LOGE("Can't load AOT data from %s; no such file.",
-            aot_data_path.c_str());
-    return nullptr;
-  }
-  FlutterEngineAOTDataSource source = {};
-  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
-  source.elf_path = aot_data_path.c_str();
-  FlutterEngineAOTData data = nullptr;
-  auto result = embedder_api_.CreateAOTData(&source, &data);
-  if (result != kSuccess) {
-    FT_LOGE("Failed to load AOT data from: %s", aot_data_path.c_str());
-    return nullptr;
-  }
-  return UniqueAotDataPtr(data);
-}
-
-bool FlutterTizenEngine::RunEngine(
-    const FlutterDesktopEngineProperties& engine_properties) {
+bool FlutterTizenEngine::RunEngine() {
   if (IsHeaded() && !renderer->IsValid()) {
     FT_LOGE("The display was not valid.");
     return false;
   }
 
+  if (!project_->HasValidPaths()) {
+    FT_LOGE("Missing or unresolvable paths to assets.");
+    return false;
+  }
+  std::string assets_path_string = project_->assets_path().u8string();
+  std::string icu_path_string = project_->icu_path().u8string();
+  if (embedder_api_.RunsAOTCompiledDartCode()) {
+    aot_data_ = project_->LoadAotData(embedder_api_);
+    if (!aot_data_) {
+      FT_LOGE("Unable to start engine without AOT data.");
+      return false;
+    }
+  }
+
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
+  std::vector<std::string> switches = project_->switches();
   std::vector<const char*> argv = {"placeholder"};
-  if (engine_properties.switches_count > 0) {
-    argv.insert(argv.end(), &engine_properties.switches[0],
-                &engine_properties.switches[engine_properties.switches_count]);
-  }
+  std::transform(
+      switches.begin(), switches.end(), std::back_inserter(argv),
+      [](const std::string& arg) -> const char* { return arg.c_str(); });
 
-  for (size_t i = 0; i < engine_properties.switches_count; ++i) {
-    auto str = std::string{engine_properties.switches[i]};
-    if (str.find("verbose-logging") != std::string::npos) {
-      SetMinLoggingLevel(DLOG_INFO);
-    }
+  if (std::find(switches.begin(), switches.end(), "verbose-logging") !=
+      switches.end()) {
+    SetMinLoggingLevel(DLOG_INFO);
   }
 
   // Configure task runners.
@@ -173,10 +162,10 @@ bool FlutterTizenEngine::RunEngine(
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = engine_properties.assets_path;
-  args.icu_data_path = engine_properties.icu_data_path;
+  args.assets_path = assets_path_string.c_str();
+  args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
-  args.command_line_argv = &argv[0];
+  args.command_line_argv = argv.size() > 0 ? argv.data() : nullptr;
   args.platform_message_callback =
       [](const FlutterPlatformMessage* engine_message, void* user_data) {
         if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
@@ -198,13 +187,7 @@ bool FlutterTizenEngine::RunEngine(
     };
   }
 #endif
-
-  if (embedder_api_.RunsAOTCompiledDartCode()) {
-    aot_data_ = LoadAotData(engine_properties.aot_library_path);
-    if (!aot_data_) {
-      FT_LOGE("Unable to start engine without AOT data.");
-      return false;
-    }
+  if (aot_data_) {
     args.aot_data = aot_data_.get();
   }
 
