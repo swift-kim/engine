@@ -79,8 +79,6 @@ class FlutterTizenEngineTest : public testing::Test {
 TEST_F(FlutterTizenEngineTest, Run) {
   EXPECT_TRUE(engine_ != nullptr);
   EXPECT_TRUE(engine_->RunEngine(engine_prop));
-  // TODO : FIXME
-  std::this_thread::sleep_for(1s);
   EXPECT_TRUE(true);
 }
 
@@ -88,30 +86,19 @@ TEST_F(FlutterTizenEngineTest, Run) {
 TEST_F(FlutterTizenEngineTest, DISABLED_Run_Twice) {
   EXPECT_TRUE(engine_ != nullptr);
   EXPECT_TRUE(engine_->RunEngine(engine_prop));
-  // TODO : FIXME
-  std::this_thread::sleep_for(1s);
-
   EXPECT_FALSE(engine_->RunEngine(engine_prop));
-  std::this_thread::sleep_for(1s);
-
   EXPECT_TRUE(true);
 }
 
 TEST_F(FlutterTizenEngineTest, Stop) {
   EXPECT_TRUE(engine_ != nullptr);
   EXPECT_TRUE(engine_->RunEngine(engine_prop));
-  // TODO : FIXME
-  std::this_thread::sleep_for(1s);
-
   EXPECT_TRUE(engine_->StopEngine());
 }
 
 TEST_F(FlutterTizenEngineTest, Stop_Twice) {
   EXPECT_TRUE(engine_ != nullptr);
   EXPECT_TRUE(engine_->RunEngine(engine_prop));
-  // TODO : FIXME
-  std::this_thread::sleep_for(1s);
-
   EXPECT_TRUE(engine_->StopEngine());
   EXPECT_FALSE(engine_->StopEngine());
 }
