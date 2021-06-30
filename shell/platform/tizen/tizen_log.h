@@ -6,8 +6,14 @@
 #define EMBEDDER_TIZEN_LOG_H_
 
 #ifndef __X64_SHELL__
-
 #include <dlog.h>
+#else
+#define log_priority int
+#define DLOG_DEBUG 0
+#define DLOG_WARN 1
+#define DLOG_INFO 2
+#define DLOG_ERROR 3
+#endif
 
 #include <cassert>
 #include <cstdlib>
@@ -29,7 +35,9 @@ log_priority GetMinLoggingLevel();
 #define LOG_TAG "ConsoleMessage"
 
 #undef __LOG
-#ifdef TV_PROFILE
+#ifdef __X64_SHELL__
+#define __LOG(prio, fmt, args...) printf(fmt, ##args)
+#elif TV_PROFILE
 // dlog_print() cannot be used because it implicitly passes LOG_ID_APPS as
 // a log id, which is ignored by TV devices. Instead, an internal function
 // __dlog_print() that takes a log id as a parameter is used.
@@ -39,6 +47,15 @@ log_priority GetMinLoggingLevel();
 #define __LOG(prio, fmt, args...) dlog_print(prio, LOG_TAG, fmt, ##args)
 #endif
 
+#ifdef __X64_SHELL__
+#define __FT_LOG(prio, fmt, args...)                                    \
+  do {                                                                  \
+    if (prio >= flutter::GetMinLoggingLevel()) {                        \
+      __LOG(prio, "%s: %s(%d) > " fmt, "X64_SHELL", __func__, __LINE__, \
+            ##args);                                                    \
+    }                                                                   \
+  } while (0)
+#else
 #define __FT_LOG(prio, fmt, args...)                                   \
   do {                                                                 \
     if (prio >= flutter::GetMinLoggingLevel()) {                       \
@@ -46,6 +63,7 @@ log_priority GetMinLoggingLevel();
             ##args);                                                   \
     }                                                                  \
   } while (0)
+#endif
 
 #define FT_LOGD(fmt, args...) __FT_LOG(DLOG_DEBUG, fmt, ##args)
 #define FT_LOGI(fmt, args...) __FT_LOG(DLOG_INFO, fmt, ##args)
@@ -87,34 +105,5 @@ log_priority GetMinLoggingLevel();
 #define FT_UNIMPLEMENTED() FT_LOGW("UNIMPLEMENTED!")
 
 }  // namespace flutter
-
-#else
-
-namespace flutter {
-
-#define log_priority int
-#define DLOG_DEBUG 0
-#define DLOG_WARN 1
-#define DLOG_INFO 2
-#define DLOG_ERROR 3
-
-void StartLogging();
-void SetMinLoggingLevel(log_priority p);
-log_priority GetMinLoggingLevel();
-
-#define FT_LOGD(fmt, args...) ((void)0)
-#define FT_LOGI(fmt, args...) ((void)0)
-#define FT_LOGW(fmt, args...) ((void)0)
-#define FT_LOGE(fmt, args...) ((void)0)
-
-#define FT_ASSERT(assertion) ((void)0)
-#define FT_ASSERT_NOT_REACHED() ((void)0)
-#define FT_ASSERT_STATIC(assertion, reason)
-#define FT_RELEASE_ASSERT_NOT_REACHED() ((void)0)
-
-#define FT_UNIMPLEMENTED() FT_LOGW("UNIMPLEMENTED!")
-
-}  // namespace flutter
-#endif
 
 #endif  // EMBEDDER_TIZEN_LOG_H_

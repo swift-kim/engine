@@ -152,7 +152,7 @@ template("embedder_for_profile") {
       libs += [
         "ecore_evas",
         "elementary",
-	"evas",
+        "evas",
       ]
 
       defines += [ "TIZEN_RENDERER_EVAS_GL" ]
@@ -162,7 +162,7 @@ template("embedder_for_profile") {
       libs += [
         "ecore_evas",
         "elementary",
-	"evas",
+        "evas",
       ]
 
       defines += [ "TIZEN_RENDERER_EVAS_GL" ]
@@ -239,6 +239,7 @@ executable("flutter_tizen_unittests") {
   libs += [
     "ecore_evas",
     "elementary",
+    "evas",
   ]
 
   defines = [ "TIZEN_RENDERER_EVAS_GL" ]

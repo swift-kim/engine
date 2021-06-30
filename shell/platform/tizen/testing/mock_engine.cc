@@ -294,7 +294,9 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 }
 
 uint64_t FlutterEngineGetCurrentTime() {
-  return 0;
+  const auto elapsed_time = std::chrono::steady_clock::now().time_since_epoch();
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed_time)
+      .count();
 }
 
 FlutterEngineResult FlutterEngineGetProcAddresses(

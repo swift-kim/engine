@@ -362,12 +362,13 @@ PlatformChannel::PlatformChannel(BinaryMessenger* messenger,
              std::unique_ptr<MethodResult<rapidjson::Document>> result) {
         HandleMethodCall(call, std::move(result));
       });
-  if (!renderer_) {
+}
+
+PlatformChannel::~PlatformChannel() {
+  if (renderer_) {
     renderer_ = nullptr;
   }
 }
-
-PlatformChannel::~PlatformChannel() {}
 
 void PlatformChannel::HandleMethodCall(
     const MethodCall<rapidjson::Document>& call,
