@@ -70,7 +70,7 @@ _public_headers = [
 config("tizen_rootstrap_include_dirs") {
   local_prefix = "$custom_sysroot/usr"
 
-  if (enable_desktop_embeddings) {
+  if (enable_desktop_embeddings && target_cpu == "x64") {
     defines = [ "__X64_SHELL__" ]
     local_prefix += "/local"
   }
@@ -81,9 +81,7 @@ config("tizen_rootstrap_include_dirs") {
     local_prefix + "/include/base",
     local_prefix + "/include/dlog",
     local_prefix + "/include/ecore-1",
-    local_prefix + "/include/ecore-evas-1",
     local_prefix + "/include/ecore-imf-1",
-    local_prefix + "/include/ecore-imf-evas-1",
     local_prefix + "/include/ecore-input-1",
     local_prefix + "/include/ecore-wayland-1",
     local_prefix + "/include/ecore-wl2-1",
@@ -100,6 +98,7 @@ config("tizen_rootstrap_include_dirs") {
   # Contain headers that the Evas_GL renderer depends on.
   include_dirs += [
     local_prefix + "/include/ecore-con-1",
+    local_prefix + "/include/ecore-evas-1",
     local_prefix + "/include/ecore-file-1",
     local_prefix + "/include/edje-1",
     local_prefix + "/include/eet-1",
@@ -111,7 +110,7 @@ config("tizen_rootstrap_include_dirs") {
     local_prefix + "/include/evas-1",
   ]
 
-  if (enable_desktop_embeddings) {
+  if (enable_desktop_embeddings && target_cpu == "x64") {
     include_dirs += [ local_prefix + "/include/eldbus-1" ]
   }
 
