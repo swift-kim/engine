@@ -227,99 +227,91 @@ test_fixtures("flutter_tizen_fixtures") {
   fixtures = []
 }
 
-executable("flutter_tizen_unittests") {
-  testonly = true
+template("embedder_executable") {
+  forward_variables_from(invoker, [ "unit_test" ])
 
-  public = _public_headers
+  if (!defined(unit_test)) {
+    unit_test = false
+  }
 
-  sources = _flutter_tizen_source
+  executable("${target_name}") {
+    if (unit_test) {
+      testonly = true
+    }
 
-  sources += [
+    public = _public_headers
+
+    sources = _flutter_tizen_source
+
+    sources += [ "tizen_renderer_evas_gl.cc" ]
+
+    if (defined(invoker.sources)) {
+      sources += invoker.sources
+    }
+
+    libs = _libs_minimum
+
+    libs += [
+      "ecore_evas",
+      "elementary",
+      "evas",
+    ]
+
+    defines = [ "TIZEN_RENDERER_EVAS_GL" ]
+
+    cflags_cc = [
+      "-Wno-newline-eof",
+      "-Wno-macro-redefined",
+    ]
+
+    public_configs = [ "//flutter:config" ]
+
+    configs += [
+      ":tizen_rootstrap_include_dirs",
+      "//flutter/shell/platform/common:desktop_library_implementation",
+    ]
+
+    deps = [
+      "//flutter/runtime:libdart",
+      "//flutter/shell/platform/common:common_cpp",
+      "//flutter/shell/platform/common:common_cpp_input",
+      "//flutter/shell/platform/common:common_cpp_library_headers",
+      "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+      "//flutter/shell/platform/embedder:embedder_headers",
+      "//third_party/rapidjson",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    if (defined(invoker.public_deps)) {
+      public_deps = invoker.public_deps
+    }
+  }
+}
+
+embedder_executable("flutter_tizen_unittests") {
+  unit_test = true
+
+  sources = [
     "flutter_tizen_engine_test.cc",
     "testing/mock_engine.cc",
-    "tizen_renderer_evas_gl.cc",
-  ]
-
-  libs = _libs_minimum
-
-  libs += [
-    "ecore_evas",
-    "elementary",
-    "evas",
-  ]
-
-  defines = [ "TIZEN_RENDERER_EVAS_GL" ]
-
-  cflags_cc = [
-    "-Wno-newline-eof",
-    "-Wno-macro-redefined",
-  ]
-
-  public_configs = [ "//flutter:config" ]
-
-  configs += [
-    ":tizen_rootstrap_include_dirs",
-    "//flutter/shell/platform/common:desktop_library_implementation",
   ]
 
   public_deps = [ "//third_party/googletest:gtest" ]
 
   deps = [
     ":flutter_tizen_fixtures",
-    "//flutter/runtime:libdart",
-    "//flutter/shell/platform/common:common_cpp",
-    "//flutter/shell/platform/common:common_cpp_input",
-    "//flutter/shell/platform/common:common_cpp_library_headers",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
-    "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
-    "//third_party/rapidjson",
   ]
 }
 
-executable("flutter_tizen_shell") {
-  public = _public_headers
-
-  sources = _flutter_tizen_source
-
-  sources += [ "tizen_renderer_evas_gl.cc" ]
-
-  sources += [ "flutter_tizen_shell.cc" ]
-
-  libs = _libs_minimum
-
-  libs += [
-    "ecore_evas",
-    "elementary",
-    "evas",
-  ]
-
-  defines = [ "TIZEN_RENDERER_EVAS_GL" ]
-
-  cflags_cc = [
-    "-Wno-newline-eof",
-    "-Wno-macro-redefined",
-  ]
-
-  public_configs = [ "//flutter:config" ]
-
-  configs += [
-    ":tizen_rootstrap_include_dirs",
-    "//flutter/shell/platform/common:desktop_library_implementation",
-  ]
+embedder_executable("flutter_tizen_shell") {
+  sources = [ "flutter_tizen_shell.cc" ]
 
   public_deps = [ ":flutter_engine" ]
-
-  deps = [
-    "//flutter/runtime:libdart",
-    "//flutter/shell/platform/common:common_cpp",
-    "//flutter/shell/platform/common:common_cpp_input",
-    "//flutter/shell/platform/common:common_cpp_library_headers",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
-    "//flutter/shell/platform/embedder:embedder_headers",
-    "//third_party/rapidjson",
-  ]
 }
 
 publish_client_wrapper_core("publish_cpp_client_wrapper") {
