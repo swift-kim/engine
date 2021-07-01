@@ -6,7 +6,21 @@
 
 #include "flutter/shell/platform/common/json_message_codec.h"
 
-#ifndef __X64_SHELL__
+#ifdef __X64_SHELL__
+int system_settings_set_changed_cb(system_settings_key_e key,
+                                   system_settings_changed_cb callback,
+                                   void* user_data) {
+  return 0;
+}
+
+int system_settings_unset_changed_cb(system_settings_key_e key) {
+  return 0;
+}
+
+int system_settings_get_value_bool(system_settings_key_e key, bool* value) {
+  return 0;
+}
+#endif
 
 namespace flutter {
 
@@ -56,18 +70,3 @@ void SettingsChannel::OnSettingsChangedCallback(system_settings_key_e key,
 }
 
 }  // namespace flutter
-
-#else
-namespace flutter {
-namespace {
-constexpr char kChannelName[] = "flutter/settings";
-}  // namespace
-SettingsChannel::SettingsChannel(BinaryMessenger* messenger)
-    : channel_(std::make_unique<BasicMessageChannel<rapidjson::Document>>(
-          messenger,
-          kChannelName,
-          &JsonMessageCodec::GetInstance())) {}
-
-SettingsChannel::~SettingsChannel() {}
-}  // namespace flutter
-#endif

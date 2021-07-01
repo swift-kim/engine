@@ -8,6 +8,7 @@
 #ifndef __X64_SHELL__
 #include <dlog.h>
 #else
+#include <stdio.h>
 #define log_priority int
 #define DLOG_DEBUG 0
 #define DLOG_WARN 1
@@ -36,7 +37,7 @@ log_priority GetMinLoggingLevel();
 
 #undef __LOG
 #ifdef __X64_SHELL__
-#define __LOG(prio, fmt, args...) printf(fmt, ##args)
+#define __LOG(prio, fmt, args...) printf("[%d]" fmt, prio, ##args)
 #elif TV_PROFILE
 // dlog_print() cannot be used because it implicitly passes LOG_ID_APPS as
 // a log id, which is ignored by TV devices. Instead, an internal function

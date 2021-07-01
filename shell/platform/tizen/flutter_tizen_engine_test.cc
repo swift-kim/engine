@@ -3,18 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <unistd.h>
-#include <chrono>
-#include <thread>
-#include "gtest/gtest.h"
-
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
-
-using namespace std::chrono_literals;
-
-std::string TPK_ROOT_PATH = "/tpkroot";
-std::string LIB_PATH = "/lib";
-std::string RES_PATH = "/res";
+#include "gtest/gtest.h"
 
 TEST(FlutterTizenEngineTestSimple, Create_Headless) {
   flutter::FlutterTizenEngine* tizen_engine =
@@ -37,25 +27,25 @@ class FlutterTizenEngineTest : public testing::Test {
     std::string tpk_root;
     char path[256];
     EXPECT_TRUE(getcwd(path, sizeof(path)) != NULL);
-    tpk_root = path + TPK_ROOT_PATH;
+    tpk_root = path + std::string("/tpkroot");
 
-    assets_path = tpk_root + RES_PATH + "/flutter_assets";
-    icu_data_path = tpk_root + RES_PATH + "/icudtl.dat";
-    aot_lib_path = tpk_root + LIB_PATH + "/libapp.so";
+    assets_path_ = tpk_root + "/res/flutter_assets";
+    icu_data_path_ = tpk_root + "/res/icudtl.dat";
+    aot_lib_path_ = tpk_root + "/lib/libapp.so";
 
-    switches.push_back("--disable-observatory");
-    // switches.push_back("--verbose-logging");
-    // switches.push_back("--enable-dart-profiling");
-    // switches.push_back("--enable-checked-mode");
+    switches_.push_back("--disable-observatory");
+    // switches_.push_back("--verbose-logging");
+    // switches_.push_back("--enable-dart-profiling");
+    // switches_.push_back("--enable-checked-mode");
   }
 
  protected:
   void SetUp() {
-    engine_prop.assets_path = assets_path.c_str();
-    engine_prop.icu_data_path = icu_data_path.c_str();
-    engine_prop.aot_library_path = aot_lib_path.c_str();
-    engine_prop.switches = switches.data();
-    engine_prop.switches_count = switches.size();
+    engine_prop_.assets_path = assets_path_.c_str();
+    engine_prop_.icu_data_path = icu_data_path_.c_str();
+    engine_prop_.aot_library_path = aot_lib_path_.c_str();
+    engine_prop_.switches = switches_.data();
+    engine_prop_.switches_count = switches_.size();
 
     auto engine = std::make_unique<flutter::FlutterTizenEngine>(false);
     engine_ = engine.release();
@@ -68,37 +58,37 @@ class FlutterTizenEngineTest : public testing::Test {
     engine_ = nullptr;
   }
 
-  std::string assets_path;
-  std::string icu_data_path;
-  std::string aot_lib_path;
+  std::string assets_path_;
+  std::string icu_data_path_;
+  std::string aot_lib_path_;
   flutter::FlutterTizenEngine* engine_;
-  FlutterDesktopEngineProperties engine_prop = {};
-  std::vector<const char*> switches;
+  FlutterDesktopEngineProperties engine_prop_ = {};
+  std::vector<const char*> switches_;
 };
 
 TEST_F(FlutterTizenEngineTest, Run) {
   EXPECT_TRUE(engine_ != nullptr);
-  EXPECT_TRUE(engine_->RunEngine(engine_prop));
+  EXPECT_TRUE(engine_->RunEngine(engine_prop_));
   EXPECT_TRUE(true);
 }
 
 // TODO
 TEST_F(FlutterTizenEngineTest, DISABLED_Run_Twice) {
   EXPECT_TRUE(engine_ != nullptr);
-  EXPECT_TRUE(engine_->RunEngine(engine_prop));
-  EXPECT_FALSE(engine_->RunEngine(engine_prop));
+  EXPECT_TRUE(engine_->RunEngine(engine_prop_));
+  EXPECT_FALSE(engine_->RunEngine(engine_prop_));
   EXPECT_TRUE(true);
 }
 
 TEST_F(FlutterTizenEngineTest, Stop) {
   EXPECT_TRUE(engine_ != nullptr);
-  EXPECT_TRUE(engine_->RunEngine(engine_prop));
+  EXPECT_TRUE(engine_->RunEngine(engine_prop_));
   EXPECT_TRUE(engine_->StopEngine());
 }
 
 TEST_F(FlutterTizenEngineTest, Stop_Twice) {
   EXPECT_TRUE(engine_ != nullptr);
-  EXPECT_TRUE(engine_->RunEngine(engine_prop));
+  EXPECT_TRUE(engine_->RunEngine(engine_prop_));
   EXPECT_TRUE(engine_->StopEngine());
   EXPECT_FALSE(engine_->StopEngine());
 }

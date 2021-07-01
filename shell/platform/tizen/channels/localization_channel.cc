@@ -4,8 +4,57 @@
 
 #include "localization_channel.h"
 #ifndef __X64_SHELL__
-
 #include <utils_i18n.h>
+#else
+typedef enum {
+  I18N_ERROR_NONE, /**< No error, no warning */
+  I18N_ERROR_NOT_SUPPORTED,
+} i18n_error_code_e;
+
+int i18n_ulocale_set_default(const char* locale_id) {
+  return I18N_ERROR_NONE;
+}
+
+int i18n_ulocale_get_default(const char** locale) {
+  *locale = "en_US.UTF-8";
+  return I18N_ERROR_NONE;
+}
+
+int i18n_ulocale_get_language(const char* locale_id,
+                              char* language,
+                              int32_t language_capacity,
+                              int32_t* buf_size_language) {
+  return I18N_ERROR_NOT_SUPPORTED;
+}
+
+const char* i18n_ulocale_get_available(int32_t n) {
+  return "en_US.UTF-8";
+}
+
+int32_t i18n_ulocale_get_country(const char* locale_id,
+                                 char* country,
+                                 int32_t country_capacity,
+                                 int* error) {
+  return 0;
+}
+
+int32_t i18n_ulocale_count_available(void) {
+  return 0;
+}
+
+int32_t i18n_ulocale_get_script(const char* locale_id,
+                                char* script,
+                                int32_t script_capacity) {
+  return 0;
+}
+
+int32_t i18n_ulocale_get_variant(const char* locale_id,
+                                 char* variant,
+                                 int32_t variant_capacity) {
+  return 0;
+}
+
+#endif
 #include <vector>
 
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
@@ -148,7 +197,7 @@ FlutterLocale* LocalizationChannel::GetFlutterLocale(const char* locale) {
     country[bufSize] = '\0';
   }
 
-  // set script code, script code is an optional field
+  // set script code, script code ./unis an optional field
   bufSize = i18n_ulocale_get_script(locale, buffer, capacity);
   if (bufSize > 0) {
     script = new char[bufSize + 1];
@@ -201,34 +250,3 @@ void LocalizationChannel::DestroyFlutterLocale(FlutterLocale* flutter_locale) {
   }
 }
 }  // namespace flutter
-#else
-#include <vector>
-
-#include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
-#include "flutter/shell/platform/tizen/tizen_log.h"
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-
-namespace flutter {
-LocalizationChannel::LocalizationChannel(FlutterTizenEngine* engine)
-    : engine_(engine) {
-  if (!engine_) {
-    engine_ = nullptr;
-  }
-}
-
-LocalizationChannel::~LocalizationChannel() {}
-
-void LocalizationChannel::SendLocales() {}
-
-void LocalizationChannel::SendPlatformResolvedLocale() {}
-
-FlutterLocale* LocalizationChannel::GetFlutterLocale(const char* locale) {
-  FlutterLocale* flutter_locale = new FlutterLocale;
-  flutter_locale->struct_size = sizeof(FlutterLocale);
-  return flutter_locale;
-}
-
-void LocalizationChannel::DestroyFlutterLocale(FlutterLocale* flutter_locale) {}
-}  // namespace flutter
-#endif

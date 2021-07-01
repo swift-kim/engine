@@ -5,7 +5,6 @@
 #ifndef EMBEDDER_TIZEN_VSYNC_WAITER_H_
 #define EMBEDDER_TIZEN_VSYNC_WAITER_H_
 
-#ifndef __X64_SHELL__
 #include <Ecore.h>
 #include <tdm_client.h>
 
@@ -43,5 +42,4 @@ class TizenVsyncWaiter {
 };
 
 }  // namespace flutter
-#endif
 #endif  // EMBEDDER_TIZEN_VSYNC_WAITER_H_

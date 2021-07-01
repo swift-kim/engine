@@ -4,8 +4,6 @@
 
 #include "tizen_log.h"
 
-#ifndef __X64_SHELL__
-
 #include <pthread.h>
 #include <unistd.h>
 
@@ -74,18 +72,3 @@ void StartLogging() {
 }
 
 }  // namespace flutter
-#else
-namespace flutter {
-static log_priority min_log_priority = DLOG_ERROR;
-
-void StartLogging() {}
-
-void SetMinLoggingLevel(log_priority p) {
-  min_log_priority = p;
-}
-
-log_priority GetMinLoggingLevel() {
-  return min_log_priority;
-}
-}  // namespace flutter
-#endif
