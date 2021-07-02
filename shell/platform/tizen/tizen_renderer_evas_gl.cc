@@ -4,14 +4,15 @@
 
 #include "tizen_renderer_evas_gl.h"
 
-#include <Evas_GL_GLES3_Helpers.h>
-Evas_GL* g_evas_gl = nullptr;
-EVAS_GL_GLOBAL_GLES3_DEFINE();
-
 #ifdef __X64_SHELL__
+#include "tizen_evas_gl_helper.h"
 int gApp_width = 800;
 int gApp_height = 600;
+#else
+#include <Evas_GL_GLES3_Helpers.h>
 #endif
+Evas_GL* g_evas_gl = nullptr;
+EVAS_GL_GLOBAL_GLES3_DEFINE();
 
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
