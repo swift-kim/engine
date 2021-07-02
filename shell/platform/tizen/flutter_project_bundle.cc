@@ -7,7 +7,6 @@
 
 #include <filesystem>
 
-#include "flutter/shell/platform/common/path_utils.h"
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
 namespace flutter {
@@ -18,24 +17,6 @@ FlutterProjectBundle::FlutterProjectBundle(
       icu_path_(properties.icu_data_path) {
   if (properties.aot_library_path != nullptr) {
     aot_library_path_ = std::filesystem::path(properties.aot_library_path);
-  }
-
-  // Resolve any relative paths.
-  if (assets_path_.is_relative() || icu_path_.is_relative() ||
-      (!aot_library_path_.empty() && aot_library_path_.is_relative())) {
-    std::filesystem::path executable_location = GetExecutableDirectory();
-    if (executable_location.empty()) {
-      FT_LOGE("Unable to find executable location to resolve resource paths.");
-      assets_path_ = std::filesystem::path();
-      icu_path_ = std::filesystem::path();
-    } else {
-      assets_path_ = std::filesystem::path(executable_location) / assets_path_;
-      icu_path_ = std::filesystem::path(executable_location) / icu_path_;
-      if (!aot_library_path_.empty()) {
-        aot_library_path_ =
-            std::filesystem::path(executable_location) / aot_library_path_;
-      }
-    }
   }
 
   switches_.insert(switches_.end(), properties.switches,

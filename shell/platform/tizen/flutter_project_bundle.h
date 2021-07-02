@@ -22,8 +22,6 @@ using UniqueAotDataPtr =
 class FlutterProjectBundle {
  public:
   // Creates a new project bundle from the given properties.
-  //
-  // Treats any relative paths as relative to the directory of this executable.
   explicit FlutterProjectBundle(
       const FlutterDesktopEngineProperties& properties);
 
@@ -51,7 +49,7 @@ class FlutterProjectBundle {
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
-  std::vector<std::string> switches_;
+  std::vector<std::string> switches_ = {};
 
   // Path to the AOT library file, if any.
   std::filesystem::path aot_library_path_;
