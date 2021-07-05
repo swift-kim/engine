@@ -22,6 +22,8 @@ using UniqueAotDataPtr =
 class FlutterProjectBundle {
  public:
   // Creates a new project bundle from the given properties.
+  //
+  // Treats any relative paths as relative to the directory of the app binary.
   explicit FlutterProjectBundle(
       const FlutterDesktopEngineProperties& properties);
 

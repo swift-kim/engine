@@ -5,11 +5,29 @@
 
 #include "flutter_project_bundle.h"
 
+#include <app_common.h>
+
 #include <filesystem>
 
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
 namespace flutter {
+
+namespace {
+
+// Returns the path of the directory containing the app binary, or an empty
+// string if the directory cannot be found.
+std::filesystem::path GetExecutableDirectory() {
+  auto res_path = app_get_resource_path();
+  if (res_path == nullptr) {
+    return std::filesystem::path();
+  }
+  auto bin_path = std::filesystem::path(res_path) / ".." / "bin";
+  free(res_path);
+  return bin_path.lexically_normal();
+}
+
+}  // namespace
 
 FlutterProjectBundle::FlutterProjectBundle(
     const FlutterDesktopEngineProperties& properties)
@@ -17,6 +35,24 @@ FlutterProjectBundle::FlutterProjectBundle(
       icu_path_(properties.icu_data_path) {
   if (properties.aot_library_path != nullptr) {
     aot_library_path_ = std::filesystem::path(properties.aot_library_path);
+  }
+
+  // Resolve any relative paths.
+  if (assets_path_.is_relative() || icu_path_.is_relative() ||
+      (!aot_library_path_.empty() && aot_library_path_.is_relative())) {
+    std::filesystem::path executable_location = GetExecutableDirectory();
+    if (executable_location.empty()) {
+      FT_LOGE("Unable to find executable location to resolve resource paths.");
+      assets_path_ = std::filesystem::path();
+      icu_path_ = std::filesystem::path();
+    } else {
+      assets_path_ = std::filesystem::path(executable_location) / assets_path_;
+      icu_path_ = std::filesystem::path(executable_location) / icu_path_;
+      if (!aot_library_path_.empty()) {
+        aot_library_path_ =
+            std::filesystem::path(executable_location) / aot_library_path_;
+      }
+    }
   }
 
   switches_.insert(switches_.end(), properties.switches,
