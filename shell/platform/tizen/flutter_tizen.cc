@@ -26,12 +26,17 @@ static FlutterDesktopEngineRef HandleForEngine(
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(
-    const FlutterDesktopEngineProperties& engine_properties,
-    bool headed) {
+    const FlutterDesktopWindowProperties& window_properties,
+    const FlutterDesktopEngineProperties& engine_properties) {
   flutter::StartLogging();
 
   flutter::FlutterProjectBundle project(engine_properties);
-  auto engine = std::make_unique<flutter::FlutterTizenEngine>(project, headed);
+  auto engine = std::make_unique<flutter::FlutterTizenEngine>(project);
+  if (window_properties.headed) {
+    engine->InitializeRenderer(window_properties.x, window_properties.y,
+                               window_properties.width,
+                               window_properties.height);
+  }
   if (!engine->RunEngine()) {
     FT_LOGE("Failed to run the Flutter engine.");
     return nullptr;

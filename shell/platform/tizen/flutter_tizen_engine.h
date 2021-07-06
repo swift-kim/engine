@@ -51,7 +51,7 @@ namespace flutter {
 class FlutterTizenEngine : public TizenRenderer::Delegate {
  public:
   // Creates a new Flutter engine object configured to run |project|.
-  explicit FlutterTizenEngine(const FlutterProjectBundle& project, bool headed);
+  explicit FlutterTizenEngine(const FlutterProjectBundle& project);
 
   virtual ~FlutterTizenEngine();
 
@@ -60,7 +60,7 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   FlutterTizenEngine& operator=(FlutterTizenEngine const&) = delete;
 
   // Sets up an instance of TizenRenderer.
-  void InitializeRenderer();
+  void InitializeRenderer(int32_t x, int32_t y, int32_t width, int32_t height);
 
   // Starts running the engine.
   bool RunEngine();

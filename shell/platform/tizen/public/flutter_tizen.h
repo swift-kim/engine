@@ -21,6 +21,21 @@ extern "C" {
 struct FlutterDesktopEngine;
 typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
 
+// Properties for configuring the initial settings of a Flutter window.
+typedef struct {
+  // Whether the app is headed or headless. Other properties are ignored if
+  // this value is set to false.
+  bool headed;
+  // The x-coordinate of the top left corner of the window.
+  int32_t x;
+  // The y-coordinate of the top left corner of the window.
+  int32_t y;
+  // The width of the window, or the maximum width if the value is zero.
+  int32_t width;
+  // The height of the window, or the maximum height if the value is zero.
+  int32_t height;
+} FlutterDesktopWindowProperties;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -41,9 +56,9 @@ typedef struct {
 // Runs an instance of a Flutter engine with the given properties.
 //
 // If |headed| is false, the engine is run in headless mode.
-FLUTTER_EXPORT FlutterDesktopEngineRef
-FlutterDesktopRunEngine(const FlutterDesktopEngineProperties& engine_properties,
-                        bool headed);
+FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopRunEngine(
+    const FlutterDesktopWindowProperties& window_properties,
+    const FlutterDesktopEngineProperties& engine_properties);
 
 // Shuts down the given engine instance.
 //

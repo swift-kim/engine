@@ -33,8 +33,7 @@ constexpr double kProfileFactor = 1.0;
 
 }  // namespace
 
-FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project,
-                                       bool headed)
+FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project)
     : project_(std::make_unique<FlutterProjectBundle>(project)),
       aot_data_(nullptr, nullptr) {
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
@@ -58,19 +57,20 @@ FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project,
 
   plugin_registrar_ = std::make_unique<FlutterDesktopPluginRegistrar>();
   plugin_registrar_->engine = this;
-
-  if (headed) {
-    InitializeRenderer();
-  }
 }
 
 FlutterTizenEngine::~FlutterTizenEngine() {
   renderer = nullptr;
 }
 
-void FlutterTizenEngine::InitializeRenderer() {
+void FlutterTizenEngine::InitializeRenderer(int32_t x,
+                                            int32_t y,
+                                            int32_t width,
+                                            int32_t height) {
+  TizenRenderer::WindowGeometry geometry = {x, y, width, height};
+
 #ifdef TIZEN_RENDERER_EVAS_GL
-  renderer = std::make_unique<TizenRendererEvasGL>(*this);
+  renderer = std::make_unique<TizenRendererEvasGL>(geometry, *this);
 
   render_loop_ = std::make_unique<TizenRenderEventLoop>(
       std::this_thread::get_id(),  // main thread
@@ -81,7 +81,7 @@ void FlutterTizenEngine::InitializeRenderer() {
       },
       renderer.get());
 #else
-  renderer = std::make_unique<TizenRendererEcoreWl2>(*this);
+  renderer = std::make_unique<TizenRendererEcoreWl2>(geometry, *this);
 
   tizen_vsync_waiter_ = std::make_unique<TizenVsyncWaiter>(this);
 #endif
@@ -340,7 +340,7 @@ void FlutterTizenEngine::SetWindowOrientation(int32_t degree) {
   renderer->SetRotate(degree);
   // Compute renderer transformation based on the angle of rotation.
   double rad = (360 - degree) * M_PI / 180;
-  auto geometry = renderer->GetGeometry();
+  auto geometry = renderer->GetCurrentGeometry();
   double width = geometry.w;
   double height = geometry.h;
 
