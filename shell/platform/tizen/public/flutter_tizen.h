@@ -77,21 +77,29 @@ FlutterDesktopGetPluginRegistrar(FlutterDesktopEngineRef engine,
 FLUTTER_EXPORT FlutterDesktopMessengerRef
 FlutterDesktopEngineGetMessenger(FlutterDesktopEngineRef engine);
 
+// Posts a locale change notification to the engine instance.
 FLUTTER_EXPORT void FlutterDesktopNotifyLocaleChange(
     FlutterDesktopEngineRef engine);
 
+// Posts a low memory notification to the engine instance.
 FLUTTER_EXPORT void FlutterDesktopNotifyLowMemoryWarning(
     FlutterDesktopEngineRef engine);
 
+// Notifies the engine that the app is in an inactive state and not receiving
+// user input.
 FLUTTER_EXPORT void FlutterDesktopNotifyAppIsInactive(
     FlutterDesktopEngineRef engine);
 
+// Notifies the engine that the app is visible and responding to user input.
 FLUTTER_EXPORT void FlutterDesktopNotifyAppIsResumed(
     FlutterDesktopEngineRef engine);
 
+// Notifies the engine that the app is not currently visible to the user, not
+// responding to user input, and running in the background.
 FLUTTER_EXPORT void FlutterDesktopNotifyAppIsPaused(
     FlutterDesktopEngineRef engine);
 
+// Notifies the engine that the engine is detached from any host views.
 FLUTTER_EXPORT void FlutterDesktopNotifyAppIsDetached(
     FlutterDesktopEngineRef engine);
 
