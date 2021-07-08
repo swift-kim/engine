@@ -5,7 +5,11 @@
 
 #include "flutter_project_bundle.h"
 
+#ifdef __X64_SHELL__
+#include "flutter/shell/platform/common/path_utils.h"
+#else
 #include <app_common.h>
+#endif
 
 #include <filesystem>
 
@@ -13,6 +17,7 @@
 
 namespace flutter {
 
+#ifndef __X64_SHELL__
 namespace {
 
 // Returns the path of the directory containing the app binary, or an empty
@@ -28,6 +33,7 @@ std::filesystem::path GetExecutableDirectory() {
 }
 
 }  // namespace
+#endif
 
 FlutterProjectBundle::FlutterProjectBundle(
     const FlutterDesktopEngineProperties& properties)

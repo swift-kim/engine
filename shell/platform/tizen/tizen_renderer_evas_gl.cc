@@ -6,8 +6,6 @@
 
 #ifdef __X64_SHELL__
 #include "tizen_evas_gl_helper.h"
-int gApp_width = 800;
-int gApp_height = 600;
 #else
 #include <Evas_GL_GLES3_Helpers.h>
 #endif
@@ -667,10 +665,6 @@ Evas_Object* TizenRendererEvasGL::SetupEvasWindow(int32_t* width,
   int32_t x = initial_geometry_.x;
   int32_t y = initial_geometry_.y;
 
-#ifdef __X64_SHELL__
-  width = gApp_width;
-  height = gApp_height;
-#endif
   elm_win_alpha_set(evas_window_, EINA_FALSE);
   evas_object_move(evas_window_, x, y);
   evas_object_resize(evas_window_, *width, *height);
