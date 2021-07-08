@@ -149,11 +149,13 @@ class FlutterTizenEngine : public TizenRenderer::Delegate {
   // FlutterTizenEngine.
   FlutterRendererConfig GetRendererConfig();
 
-  // The handle to the embedder.h engine instance.
+  // The Flutter engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
 
+  // The proc table of the embedder APIs.
   FlutterEngineProcTable embedder_api_ = {};
 
+  // The data required for configuring a Flutter engine instance.
   std::unique_ptr<FlutterProjectBundle> project_;
 
   // AOT data for this engine instance, if applicable.
