@@ -34,7 +34,7 @@ class FlutterTizenEngineTest : public ::testing::Test {
     engine_ = nullptr;
   }
 
-  flutter::FlutterTizenEngine* engine_;
+  FlutterTizenEngine* engine_;
 };
 
 class FlutterTizenEngineTestHeaded : public FlutterTizenEngineTest {
@@ -48,14 +48,11 @@ class FlutterTizenEngineTestHeaded : public FlutterTizenEngineTest {
 TEST_F(FlutterTizenEngineTest, Run) {
   EXPECT_TRUE(engine_ != nullptr);
   EXPECT_TRUE(engine_->RunEngine());
-  EXPECT_TRUE(true);
 }
 
-// TODO
-TEST_F(FlutterTizenEngineTest, DISABLED_Run_Twice) {
+TEST_F(FlutterTizenEngineTest, Run_Twice) {
   EXPECT_TRUE(engine_->RunEngine());
   EXPECT_FALSE(engine_->RunEngine());
-  EXPECT_TRUE(true);
 }
 
 TEST_F(FlutterTizenEngineTest, Stop) {

@@ -92,6 +92,10 @@ void FlutterTizenEngine::NotifyLowMemoryWarning() {
 }
 
 bool FlutterTizenEngine::RunEngine() {
+  if (engine_ != nullptr) {
+    FT_LOGE("The engine has already started.");
+    return false;
+  }
   if (IsHeaded() && !renderer->IsValid()) {
     FT_LOGE("The display was not valid.");
     return false;
