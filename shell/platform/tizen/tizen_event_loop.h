@@ -21,12 +21,15 @@
 
 namespace flutter {
 
+typedef uint64_t (*CurrentTimeProc)();
+
 class TizenRenderer;
 
 class TizenEventLoop {
  public:
   using TaskExpiredCallback = std::function<void(const FlutterTask*)>;
   TizenEventLoop(std::thread::id main_thread_id,
+                 CurrentTimeProc get_current_time,
                  TaskExpiredCallback on_task_expired);
   virtual ~TizenEventLoop();
   bool RunsTasksOnCurrentThread() const;
@@ -56,6 +59,7 @@ class TizenEventLoop {
     };
   };
   std::thread::id main_thread_id_;
+  CurrentTimeProc get_current_time_;
   TaskExpiredCallback on_task_expired_;
   std::mutex task_queue_mutex_;
   std::priority_queue<Task, std::deque<Task>, Task::Comparer> task_queue_;
@@ -75,13 +79,14 @@ class TizenEventLoop {
 
   static Eina_Bool TaskTimerCallback(void* data);
 
-  static TaskTimePoint TimePointFromFlutterTime(
-      uint64_t flutter_target_time_nanos);
+  // Returns a TaskTimePoint computed from the given target time from Flutter.
+  TaskTimePoint TimePointFromFlutterTime(uint64_t flutter_target_time_nanos);
 };
 
 class TizenPlatformEventLoop : public TizenEventLoop {
  public:
   TizenPlatformEventLoop(std::thread::id main_thread_id,
+                         CurrentTimeProc get_current_time,
                          TaskExpiredCallback on_task_expired);
   virtual ~TizenPlatformEventLoop();
   virtual void OnTaskExpired() override;
@@ -91,6 +96,7 @@ class TizenPlatformEventLoop : public TizenEventLoop {
 class TizenRenderEventLoop : public TizenEventLoop {
  public:
   TizenRenderEventLoop(std::thread::id main_thread_id,
+                       CurrentTimeProc get_current_time,
                        TaskExpiredCallback on_task_expired,
                        TizenRenderer* renderer);
   virtual ~TizenRenderEventLoop();
