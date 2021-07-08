@@ -155,6 +155,6 @@ void TizenRenderEventLoop::OnTaskExpired() {
     // Do nothing
   }
 }
-#endif
+#endif  // TIZEN_RENDERER_EVAS_GL
 
 }  // namespace flutter
