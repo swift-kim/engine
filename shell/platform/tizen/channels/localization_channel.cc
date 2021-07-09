@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/tizen/flutter_tizen_engine.h"
-#include "flutter/shell/platform/tizen/tizen_log.h"
+#include "flutter/shell/platform/tizen/logger.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 

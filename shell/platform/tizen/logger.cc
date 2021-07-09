@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "tizen_log.h"
+#include "logger.h"
 
 #include <pthread.h>
 #include <unistd.h>
@@ -65,4 +65,5 @@ void StartLogging() {
   }
   is_running = true;
 }
+
 }  // namespace flutter
