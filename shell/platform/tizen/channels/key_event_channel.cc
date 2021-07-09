@@ -7,7 +7,7 @@
 #include <map>
 
 #include "flutter/shell/platform/common/json_message_codec.h"
-#include "flutter/shell/platform/tizen/logger.h"
+#include "flutter/shell/platform/tizen/tizen_log.h"
 
 namespace flutter {
 

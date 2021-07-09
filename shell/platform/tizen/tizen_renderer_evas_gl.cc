@@ -12,7 +12,7 @@
 Evas_GL* g_evas_gl = nullptr;
 EVAS_GL_GLOBAL_GLES3_DEFINE();
 
-#include "flutter/shell/platform/tizen/logger.h"
+#include "flutter/shell/platform/tizen/tizen_log.h"
 
 namespace flutter {
 

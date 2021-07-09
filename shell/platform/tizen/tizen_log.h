@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EMBEDDER_LOGGER_H_
-#define EMBEDDER_LOGGER_H_
+#ifndef EMBEDDER_TIZEN_LOG_H_
+#define EMBEDDER_TIZEN_LOG_H_
 
 #ifndef __X64_SHELL__
 #include <dlog.h>
@@ -76,4 +76,4 @@ void StartLogging();
 
 }  // namespace flutter
 
-#endif  // EMBEDDER_LOGGER_H_
+#endif  // EMBEDDER_TIZEN_LOG_H_
