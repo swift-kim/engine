@@ -29,7 +29,7 @@ FlutterDesktopEngineRef FlutterDesktopRunEngine(
     const FlutterDesktopWindowProperties& window_properties,
     const FlutterDesktopEngineProperties& engine_properties) {
 #ifndef __X64_SHELL__
-  flutter::StartLogging();
+  flutter::Logger::Init();
 #endif
 
   flutter::FlutterProjectBundle project(engine_properties);

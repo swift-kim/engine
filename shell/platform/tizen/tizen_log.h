@@ -5,28 +5,53 @@
 #ifndef EMBEDDER_TIZEN_LOG_H_
 #define EMBEDDER_TIZEN_LOG_H_
 
-#ifndef __X64_SHELL__
-#include <dlog.h>
-#else
-#define log_priority int
-#define DLOG_DEBUG 0
-#define DLOG_WARN 1
-#define DLOG_INFO 2
-#define DLOG_ERROR 3
-#endif
+#include <pthread.h>
 
 #include <cassert>
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
+#include <string>
+
+#ifndef __X64_SHELL__
+#include <dlog.h>
+#endif
 
 #include "flutter/fml/logging.h"
 
 namespace flutter {
 
-// Starts logging threads which constantly redirect stdout/stderr to dlog.
-// The threads can be started only once per process.
-void StartLogging();
+class Logger {
+ public:
+#ifndef __X64_SHELL__
+  // Initializes the logging facility.
+  // This must be called before any call to Print() is made.
+  static bool Init();
+
+  // Starts logging threads which constantly redirect stdout/stderr to dlog,
+  // if applicable.
+  // The threads should be started only once per process.
+  static bool Start();
+#endif
+
+  // Prints a log message to either dlog or console.
+  static void Print(const char* message);
+
+ private:
+  explicit Logger();
+
+#ifndef __X64_SHELL__
+  static void* Redirect(void* arg);
+
+  static inline int (
+      *dlog_vprint_)(log_id_t, int, const char*, const char*, va_list);
+  static inline int stdout_pipe_[2];
+  static inline int stderr_pipe_[2];
+  static inline pthread_t stdout_thread_;
+  static inline pthread_t stderr_thread_;
+  static inline bool started_ = false;
+#endif
+};
 
 #define __FT_LOG(severity, fmt, args...)      \
   do {                                        \

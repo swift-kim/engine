@@ -39,6 +39,12 @@ FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project)
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
 
+#ifndef __X64_SHELL__
+  if (!embedder_api_.RunsAOTCompiledDartCode()) {
+    flutter::Logger::Start();
+  }
+#endif
+
   // Run flutter task on Tizen main loop.
   // Tizen engine has four threads (GPU thread, UI thread, IO thread, platform
   // thread). UI threads need to send flutter task to platform thread.

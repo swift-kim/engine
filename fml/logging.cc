@@ -143,6 +143,10 @@ LogMessage::~LogMessage() {
       // Unknown severity. Use INFO.
       priority = DLOG_INFO;
   }
+
+  // dlog_print() cannot be used because it implicitly passes LOG_ID_APPS as
+  // a log id, which is ignored by TV devices. Instead, an internal function
+  // __dlog_print() that takes a log id as a parameter is used.
   static int (*dlog_print)(log_id_t, int, const char*, const char*, ...);
   if (!dlog_print) {
     void* handle = dlopen("libdlog.so.0", RTLD_LAZY);
@@ -151,6 +155,8 @@ LogMessage::~LogMessage() {
     }
   }
   if (dlog_print) {
+    // "ConsoleMessage" is the only valid log tag that TV devices can
+    // understand.
     dlog_print(LOG_ID_MAIN, priority, "ConsoleMessage", "%s",
                stream_.str().c_str());
   } else {
