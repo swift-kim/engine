@@ -20,53 +20,25 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 // Starts logging threads which constantly redirect stdout/stderr to dlog.
 // The threads can be started only once per process.
 void StartLogging();
 
-// Handles filtering of logs.
-void SetMinLoggingLevel(log_priority p);
-log_priority GetMinLoggingLevel();
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-// This is the only valid log tag that TV devices can understand.
-#define LOG_TAG "ConsoleMessage"
-
-#ifndef __MODULE__
-#define __MODULE__ strrchr("/" __FILE__, '/') + 1
-#endif
-
-#undef __LOG
-
-#if defined(__X64_SHELL__)
-#define __LOG(prio, fmt, args...) \
-  fprintf(prio >= DLOG_ERROR ? stderr : stdout, fmt "\n", ##args)
-#elif defined(TV_PROFILE)
-// dlog_print() cannot be used because it implicitly passes LOG_ID_APPS as
-// a log id, which is ignored by TV devices. Instead, an internal function
-// __dlog_print() that takes a log id as a parameter is used.
-#define __LOG(prio, fmt, args...) \
-  __dlog_print(LOG_ID_MAIN, prio, LOG_TAG, fmt, ##args)
-#else
-#define __LOG(prio, fmt, args...) dlog_print(prio, LOG_TAG, fmt, ##args)
-#endif
-
-#define __FT_LOG(prio, fmt, args...)                                   \
-  do {                                                                 \
-    if (prio >= flutter::GetMinLoggingLevel()) {                       \
-      __LOG(prio, "%s: %s(%d) > " fmt, __MODULE__, __func__, __LINE__, \
-            ##args);                                                   \
-    }                                                                  \
+#define __FT_LOG(severity, fmt, args...)      \
+  do {                                        \
+    char buffer[1024];                        \
+    sprintf(buffer, fmt, ##args);             \
+    FML_LOG(severity) << std::string(buffer); \
   } while (0)
 
-#define FT_LOGD(fmt, args...) __FT_LOG(DLOG_DEBUG, fmt, ##args)
-#define FT_LOGI(fmt, args...) __FT_LOG(DLOG_INFO, fmt, ##args)
-#define FT_LOGW(fmt, args...) __FT_LOG(DLOG_WARN, fmt, ##args)
-#define FT_LOGE(fmt, args...) __FT_LOG(DLOG_ERROR, fmt, ##args)
+#define FT_LOGD(fmt, args...) __FT_LOG(DEBUG, fmt, ##args)
+#define FT_LOGI(fmt, args...) __FT_LOG(INFO, fmt, ##args)
+#define FT_LOGW(fmt, args...) __FT_LOG(WARNING, fmt, ##args)
+#define FT_LOGE(fmt, args...) __FT_LOG(ERROR, fmt, ##args)
 
 #if defined(NDEBUG)
 #define FT_ASSERT(assertion) ((void)0)

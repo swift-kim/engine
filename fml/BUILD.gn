@@ -4,6 +4,7 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/tizen/config.gni")
 import("//flutter/testing/testing.gni")
 
@@ -221,7 +222,7 @@ source_set("fml") {
     ]
   }
 
-  if (build_tizen_shell) {
+  if (build_tizen_shell && !enable_desktop_embeddings) {
     defines = [ "OS_TIZEN" ]
   }
 }

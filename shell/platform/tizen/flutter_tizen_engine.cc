@@ -124,11 +124,6 @@ bool FlutterTizenEngine::RunEngine() {
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
 
-  if (std::find(switches.begin(), switches.end(), "--verbose-logging") !=
-      switches.end()) {
-    SetMinLoggingLevel(DLOG_INFO);
-  }
-
   // Configure task runners.
   FlutterTaskRunnerDescription platform_task_runner = {};
   platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
@@ -185,8 +180,7 @@ bool FlutterTizenEngine::RunEngine() {
   args.custom_task_runners = &custom_task_runners;
   args.log_message_callback = [](const char* tag, const char* message,
                                  void* user_data) {
-    // TODO: Do not use __LOG().
-    __LOG(DLOG_INFO, "%s: %s", tag, message);
+    FT_LOGI("%s: %s", tag, message);
   };
 
 #ifndef TIZEN_RENDERER_EVAS_GL

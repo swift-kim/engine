@@ -12,17 +12,8 @@ static int stderr_pipe[2];
 static pthread_t stdout_thread;
 static pthread_t stderr_thread;
 static bool is_running = false;
-static log_priority min_log_priority = DLOG_ERROR;
 
 namespace flutter {
-
-void SetMinLoggingLevel(log_priority p) {
-  min_log_priority = p;
-};
-
-log_priority GetMinLoggingLevel() {
-  return min_log_priority;
-};
 
 static void* LoggingFunction(void* arg) {
   int* pipe = static_cast<int*>(arg);
@@ -33,7 +24,11 @@ static void* LoggingFunction(void* arg) {
 
   while ((size = read(pipe[0], buffer, sizeof(buffer) - 1)) > 0) {
     buffer[size] = 0;
-    __LOG(priority, "%s", buffer);
+    if (priority >= DLOG_ERROR) {
+      FML_LOG(ERROR) << std::string(buffer);
+    } else {
+      FML_LOG(INFO) << std::string(buffer);
+    }
   }
 
   close(pipe[0]);
