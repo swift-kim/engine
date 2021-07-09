@@ -126,6 +126,7 @@ template("embedder_for_profile") {
 
     sources = _flutter_tizen_source
     sources += [
+      "channels/clipboard.cc",
       "channels/localization_channel.cc",
       "channels/platform_channel.cc",
       "channels/settings_channel.cc",

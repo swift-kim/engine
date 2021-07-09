@@ -13,18 +13,4 @@ PlatformChannel::PlatformChannel(BinaryMessenger* messenger,
 
 PlatformChannel::~PlatformChannel() {}
 
-void PlatformChannel::HandleMethodCall(
-    const MethodCall<rapidjson::Document>& call,
-    std::unique_ptr<MethodResult<rapidjson::Document>> result) {}
-
-namespace clipboard {
-
-void GetData(const MethodCall<rapidjson::Document>& call,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result) {}
-
-void SetData(const MethodCall<rapidjson::Document>& call,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result) {}
-
-}  // namespace clipboard
-
 }  // namespace flutter
