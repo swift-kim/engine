@@ -33,16 +33,6 @@ class PlatformChannel {
 #endif  // !__X64_SHELL__
 };
 
-namespace clipboard {
-
-void GetData(const MethodCall<rapidjson::Document>& call,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result);
-
-void SetData(const MethodCall<rapidjson::Document>& call,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result);
-
-}  // namespace clipboard
-
 }  // namespace flutter
 
 #endif  // EMBEDDER_PLATFORM_CHANNEL_H_
