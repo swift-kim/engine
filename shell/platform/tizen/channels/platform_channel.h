@@ -30,7 +30,7 @@ class PlatformChannel {
   // A reference to the renderer object managed by FlutterTizenEngine.
   // This can be nullptr if the engine is running in headless mode.
   TizenRenderer* renderer_;
-#endif  // !__X64_SHELL__
+#endif
 };
 
 }  // namespace flutter

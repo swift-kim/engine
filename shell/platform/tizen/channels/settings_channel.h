@@ -29,7 +29,7 @@ class SettingsChannel {
   void SendSettingsEvent();
 
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> channel_;
-#endif  // !__X64_SHELL__
+#endif
 };
 
 }  // namespace flutter
