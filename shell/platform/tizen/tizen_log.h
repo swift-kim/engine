@@ -13,11 +13,12 @@
 #define DLOG_WARN 1
 #define DLOG_INFO 2
 #define DLOG_ERROR 3
-int dlog_print(log_priority prio, const char* tag, const char* fmt, ...);
 #endif
 
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 namespace flutter {
 
@@ -41,7 +42,10 @@ log_priority GetMinLoggingLevel();
 
 #undef __LOG
 
-#ifdef TV_PROFILE
+#if defined(__X64_SHELL__)
+#define __LOG(prio, fmt, args...) \
+  fprintf(prio >= DLOG_ERROR ? stderr : stdout, fmt "\n", ##args)
+#elif defined(TV_PROFILE)
 // dlog_print() cannot be used because it implicitly passes LOG_ID_APPS as
 // a log id, which is ignored by TV devices. Instead, an internal function
 // __dlog_print() that takes a log id as a parameter is used.

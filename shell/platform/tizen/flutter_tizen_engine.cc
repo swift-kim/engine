@@ -124,7 +124,7 @@ bool FlutterTizenEngine::RunEngine() {
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
 
-  if (std::find(switches.begin(), switches.end(), "verbose-logging") !=
+  if (std::find(switches.begin(), switches.end(), "--verbose-logging") !=
       switches.end()) {
     SetMinLoggingLevel(DLOG_INFO);
   }
