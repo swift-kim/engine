@@ -7,15 +7,9 @@
 namespace flutter {
 
 PlatformChannel::PlatformChannel(BinaryMessenger* messenger,
-                                 TizenRenderer* renderer) {
-  renderer_ = nullptr;
-}
+                                 TizenRenderer* renderer) {}
 
 PlatformChannel::~PlatformChannel() {}
-
-void PlatformChannel::HandleMethodCall(
-    const MethodCall<rapidjson::Document>& call,
-    std::unique_ptr<MethodResult<rapidjson::Document>> result) {}
 
 namespace clipboard {
 

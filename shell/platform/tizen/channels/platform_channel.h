@@ -20,6 +20,7 @@ class PlatformChannel {
   virtual ~PlatformChannel();
 
  private:
+#ifndef __X64_SHELL__
   void HandleMethodCall(
       const MethodCall<rapidjson::Document>& call,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
@@ -29,6 +30,7 @@ class PlatformChannel {
   // A reference to the renderer object managed by FlutterTizenEngine.
   // This can be nullptr if the engine is running in headless mode.
   TizenRenderer* renderer_;
+#endif  // !__X64_SHELL__
 };
 
 namespace clipboard {
