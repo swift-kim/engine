@@ -300,10 +300,16 @@ bool TizenRendererEcoreWl2::SetupEcoreWlWindow(int32_t width, int32_t height) {
   ecore_wl2_window_ =
       ecore_wl2_window_new(ecore_wl2_display_, nullptr, x, y, width, height);
   ecore_wl2_window_type_set(ecore_wl2_window_, ECORE_WL2_WINDOW_TYPE_TOPLEVEL);
-  ecore_wl2_window_alpha_set(ecore_wl2_window_, EINA_FALSE);
   ecore_wl2_window_position_set(ecore_wl2_window_, x, y);
   ecore_wl2_window_aux_hint_add(ecore_wl2_window_, 0,
                                 "wm.policy.win.user.geometry", "1");
+
+  // Makes the window transparent unless it's showing in full screen.
+  if (initial_geometry_.w > 0 || initial_geometry_.h > 0) {
+    ecore_wl2_window_alpha_set(ecore_wl2_window_, EINA_TRUE);
+  } else {
+    ecore_wl2_window_alpha_set(ecore_wl2_window_, EINA_FALSE);
+  }
 
   int rotations[4] = {0, 90, 180, 270};
   ecore_wl2_window_available_rotations_set(ecore_wl2_window_, rotations,
