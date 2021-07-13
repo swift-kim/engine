@@ -30,7 +30,7 @@ void LocalizationChannel::SendLocales() {
   int ret = i18n_ulocale_set_default(getenv("LANG"));
   ret = i18n_ulocale_get_default(&defualt_locale);
   if (ret != I18N_ERROR_NONE) {
-    FT_LOGE("i18n_ulocale_get_default() failed.");
+    FT_LOG(Error) << "i18n_ulocale_get_default() failed.";
     return;
   }
 
@@ -40,7 +40,6 @@ void LocalizationChannel::SendLocales() {
 
   flutter_locale = GetFlutterLocale(without_encoding_type.data());
   if (flutter_locale) {
-    FT_LOGI("Choose Default locale[%s]", without_encoding_type.data());
     flutter_locales.push_back(flutter_locale);
   }
 
@@ -55,8 +54,7 @@ void LocalizationChannel::SendLocales() {
     }
   }
 
-  FT_LOGI("Send %zu available locales", flutter_locales.size());
-  // Send locales to engine
+  FT_LOG(Info) << "Found " << flutter_locales.size() << " locales.";
   engine_->UpdateLocales(
       const_cast<const FlutterLocale**>(flutter_locales.data()),
       flutter_locales.size());
@@ -70,13 +68,13 @@ void LocalizationChannel::SendPlatformResolvedLocale() {
   const char* locale;
   int ret = i18n_ulocale_get_default(&locale);
   if (ret != I18N_ERROR_NONE) {
-    FT_LOGE("i18n_ulocale_get_default() failed.");
+    FT_LOG(Error) << "i18n_ulocale_get_default() failed.";
     return;
   }
 
   FlutterLocale* flutter_locale = GetFlutterLocale(locale);
   if (!flutter_locale) {
-    FT_LOGE("Language code is required but not present.");
+    FT_LOG(Error) << "Language code is required but not present.";
     return;
   }
 
@@ -107,10 +105,7 @@ void LocalizationChannel::SendPlatformResolvedLocale() {
 
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  if (!document.Accept(writer)) {
-    FT_LOGE("document.Accept failed!");
-    return;
-  }
+  document.Accept(writer);
 
   engine_->SendPlatformMessage(
       kChannelName, reinterpret_cast<const uint8_t*>(buffer.GetString()),
@@ -136,7 +131,7 @@ FlutterLocale* LocalizationChannel::GetFlutterLocale(const char* locale) {
     memcpy(language, buffer, bufSize);
     language[bufSize] = '\0';
   } else {
-    FT_LOGE("i18n_ulocale_get_language failed!");
+    FT_LOG(Error) << "i18n_ulocale_get_language() failed.";
     return nullptr;
   }
 

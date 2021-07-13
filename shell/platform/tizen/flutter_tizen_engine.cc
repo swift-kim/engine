@@ -46,7 +46,7 @@ FlutterTizenEngine::FlutterTizenEngine(const FlutterProjectBundle& project)
       std::this_thread::get_id(),  // main thread
       embedder_api_.GetCurrentTime, [this](const auto* task) {
         if (embedder_api_.RunTask(this->engine_, task) != kSuccess) {
-          FT_LOGE("Could not post an engine task.");
+          FT_LOG(Error) << "Could not post an engine task.";
         }
       });
 
@@ -80,7 +80,7 @@ void FlutterTizenEngine::InitializeRenderer(int32_t x,
       embedder_api_.GetCurrentTime,
       [this](const auto* task) {
         if (embedder_api_.RunTask(this->engine_, task) != kSuccess) {
-          FT_LOGE("Could not post an engine task.");
+          FT_LOG(Error) << "Could not post an engine task.";
         }
       },
       renderer.get());
@@ -98,16 +98,16 @@ void FlutterTizenEngine::NotifyLowMemoryWarning() {
 
 bool FlutterTizenEngine::RunEngine() {
   if (engine_ != nullptr) {
-    FT_LOGE("The engine has already started.");
+    FT_LOG(Error) << "The engine has already started.";
     return false;
   }
   if (IsHeaded() && !renderer->IsValid()) {
-    FT_LOGE("The display was not valid.");
+    FT_LOG(Error) << "The display was not valid.";
     return false;
   }
 
   if (!project_->HasValidPaths()) {
-    FT_LOGE("Missing or unresolvable paths to assets.");
+    FT_LOG(Error) << "Missing or unresolvable paths to assets.";
     return false;
   }
   std::string assets_path_string = project_->assets_path().u8string();
@@ -115,7 +115,7 @@ bool FlutterTizenEngine::RunEngine() {
   if (embedder_api_.RunsAOTCompiledDartCode()) {
     aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {
-      FT_LOGE("Unable to start engine without AOT data.");
+      FT_LOG(Error) << "Unable to start engine without AOT data.";
       return false;
     }
   }
@@ -178,9 +178,9 @@ bool FlutterTizenEngine::RunEngine() {
   args.platform_message_callback =
       [](const FlutterPlatformMessage* engine_message, void* user_data) {
         if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
-          FT_LOGE(
-              "Invalid message size received. Expected: %zu, but received %zu",
-              sizeof(FlutterPlatformMessage), engine_message->struct_size);
+          FT_LOG(Error) << "Invalid message size received. Expected: "
+                        << sizeof(FlutterPlatformMessage) << ", but received "
+                        << engine_message->struct_size;
           return;
         }
         auto engine = reinterpret_cast<FlutterTizenEngine*>(user_data);
@@ -204,10 +204,9 @@ bool FlutterTizenEngine::RunEngine() {
 
   auto result = embedder_api_.Run(FLUTTER_ENGINE_VERSION, &renderer_config,
                                   &args, this, &engine_);
-  if (result == kSuccess && engine_ != nullptr) {
-    FT_LOGI("FlutterEngineRun Success!");
-  } else {
-    FT_LOGE("FlutterEngineRun Failure! result: %d", result);
+  if (result != kSuccess || engine_ == nullptr) {
+    FT_LOG(Error) << "Failed to start the Flutter engine with error: "
+                  << result;
     return false;
   }
 
@@ -282,7 +281,7 @@ bool FlutterTizenEngine::SendPlatformMessage(
         embedder_api_.PlatformMessageCreateResponseHandle(
             engine_, reply, user_data, &response_handle);
     if (result != kSuccess) {
-      FT_LOGE("Failed to create response handle");
+      FT_LOG(Error) << "Failed to create a response handle.";
       return false;
     }
   }
