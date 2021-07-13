@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "flutter/shell/platform/tizen/tizen_log.h"
+#include "flutter/shell/platform/tizen/logger.h"
 
 namespace flutter {
 
