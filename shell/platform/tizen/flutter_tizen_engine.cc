@@ -5,14 +5,11 @@
 
 #include "flutter_tizen_engine.h"
 
-#ifndef __X64_SHELL__
-#include <utils_i18n.h>
-#endif
-
 #include <algorithm>
 #include <string>
 #include <vector>
 
+#include "flutter/shell/platform/tizen/system_utils.h"
 #include "flutter/shell/platform/tizen/tizen_log.h"
 
 namespace flutter {
@@ -35,17 +32,9 @@ constexpr double kProfileFactor = 2.0;
 constexpr double kProfileFactor = 1.0;
 #endif
 
-#ifndef __X64_SHELL__
-struct LocaleInfo {
-  std::string language;
-  std::string country;
-  std::string script;
-  std::string variant;
-};
-
-// Converts a LocaleInfo struct to a FlutterLocale struct. |info| must outlive
+// Converts a LanguageInfo struct to a FlutterLocale struct. |info| must outlive
 // the returned value, since the returned FlutterLocale has pointers into it.
-FlutterLocale CovertToFlutterLocale(const LocaleInfo& info) {
+FlutterLocale CovertToFlutterLocale(const LanguageInfo& info) {
   FlutterLocale locale = {};
   locale.struct_size = sizeof(FlutterLocale);
   locale.language_code = info.language.c_str();
@@ -60,7 +49,6 @@ FlutterLocale CovertToFlutterLocale(const LocaleInfo& info) {
   }
   return locale;
 }
-#endif
 
 }  // namespace
 
@@ -416,64 +404,13 @@ void FlutterTizenEngine::OnVsync(intptr_t baton,
 }
 
 void FlutterTizenEngine::SetupLocales() {
-#ifndef __X64_SHELL__
-  i18n_ulocale_set_default(getenv("LANG"));
-
-  const char* locale_id;
-  int ret = i18n_ulocale_get_default(&locale_id);
-  if (ret != I18N_ERROR_NONE) {
-    FT_LOGE("i18n_ulocale_get_default() failed.");
-    return;
-  }
-  std::string preferred_locale(locale_id);
-  preferred_locale = preferred_locale.substr(0, preferred_locale.find("."));
-
-  std::vector<LocaleInfo> locales;
-  int32_t count = i18n_ulocale_count_available();
-  locales.reserve(count);
-  for (int i = 0; i < count; i++) {
-    LocaleInfo locale;
-    int ret;
-    char buffer[128] = {0};
-    int32_t size;
-
-    // The "language" field is required.
-    locale_id = i18n_ulocale_get_available(i);
-    ret = i18n_ulocale_get_language(locale_id, buffer, sizeof(buffer), &size);
-    if (ret != I18N_ERROR_NONE || size == 0) {
-      continue;
-    }
-    locale.language = std::string(buffer, size);
-
-    // "country", "script", and "variant" are optional.
-    size = i18n_ulocale_get_country(locale_id, buffer, sizeof(buffer), &ret);
-    if (ret == I18N_ERROR_NONE && size > 0) {
-      locale.country = std::string(buffer, size);
-    }
-    size = i18n_ulocale_get_script(locale_id, buffer, sizeof(buffer));
-    if (size > 0) {
-      locale.script = std::string(buffer, size);
-    }
-    size = i18n_ulocale_get_variant(locale_id, buffer, sizeof(buffer));
-    if (size > 0) {
-      locale.variant = std::string(buffer, size);
-    }
-
-    if (preferred_locale.compare(locale_id) == 0) {
-      locales.insert(locales.begin(), locale);
-    } else {
-      locales.push_back(locale);
-    }
-  }
-  FT_LOGI("Found %zu locales.", locales.size());
-
-  // The locale list should be converted into the FlutterLocale list, and again
-  // to the FlutterLocale* list.
+  std::vector<LanguageInfo> languages = GetPreferredLanguageInfo();
   std::vector<FlutterLocale> flutter_locales;
-  flutter_locales.reserve(locales.size());
-  for (const auto& info : locales) {
+  flutter_locales.reserve(languages.size());
+  for (const auto& info : languages) {
     flutter_locales.push_back(CovertToFlutterLocale(info));
   }
+  // Convert the locale list to the locale pointer list that must be provided.
   std::vector<const FlutterLocale*> flutter_locale_list;
   flutter_locale_list.reserve(flutter_locales.size());
   std::transform(
@@ -483,7 +420,6 @@ void FlutterTizenEngine::SetupLocales() {
 
   embedder_api_.UpdateLocales(engine_, flutter_locale_list.data(),
                               flutter_locale_list.size());
-#endif
 }
 
 void FlutterTizenEngine::NotifyLowMemoryWarning() {
